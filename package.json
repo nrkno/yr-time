@@ -1,0 +1,44 @@
+{
+  "name": "@yr/date",
+  "description": "Moment/date utilities",
+  "version": "1.0.0",
+  "author": "Alexander Pope <alexander.pope@nrk.no>",
+  "dependencies": {
+    "is-plain-obj": "~1.0",
+    "moment": "~2.10"
+  },
+  "devDependencies": {
+    "buddy": "~3.0",
+    "expect.js": "*",
+    "mocha": "*",
+    "mocha-phantomjs": "*",
+    "transfigure-babel": "~5.8"
+  },
+  "main": "index.js",
+  "repository": "https://github.com/YR/date.git",
+  "license": "MIT",
+  "scripts": {
+    "prepublish": "buddy build",
+    "test": "NODE_ENV=test mocha test/lib-test.js --reporter spec",
+    "test-client": "buddy build && mocha-phantomjs test/test-runner.html"
+  },
+  "browser": {
+  },
+  "buddy": {
+    "build": {
+      "targets": [
+        {
+          "input": "src",
+          "output": ".",
+          "modular": false
+        },
+        {
+          "input": "src/index.js",
+          "output": "test/lib.js",
+          "boilerplate": true,
+          "bootstrap": true
+        }
+      ]
+    }
+  }
+}
