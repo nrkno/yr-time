@@ -3,7 +3,7 @@
 const isPlainObject = require('is-plain-obj')
 	, moment = require('moment')
 
-	, PARSE_KEYS = ['start', 'end', 'middle', 'rise', 'set', 'created', 'update', 'from', 'to']
+	, PARSE_KEYS = ['start', 'startNominal', 'end', 'middle', 'rise', 'set', 'created', 'update', 'from', 'to']
 
 	, localNow = Date.now()
 	, utcNow = moment.utc().valueOf();
