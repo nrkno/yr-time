@@ -1,12 +1,12 @@
 'use strict';
 
 const isPlainObject = require('is-plain-obj')
-	, moment = require('moment')
+  , moment = require('moment')
 
-	, PARSE_KEYS = ['start', 'startNominal', 'end', 'middle', 'rise', 'set', 'created', 'update', 'from', 'to']
+  , PARSE_KEYS = ['start', 'startNominal', 'end', 'middle', 'rise', 'set', 'created', 'update', 'from', 'to']
 
-	, localNow = Date.now()
-	, utcNow = moment.utc().valueOf();
+  , localNow = Date.now()
+  , utcNow = moment.utc().valueOf();
 
 exports.ANNUALLY = 'annually';
 exports.DAILY = 'daily';
@@ -20,7 +20,7 @@ exports.WEEKLY = 'weekly';
 
 // Monkey patch Moment for stringify support
 moment.fn.toJSON = function () {
-	return this.format();
+  return this.format();
 };
 
 /**
@@ -28,7 +28,7 @@ moment.fn.toJSON = function () {
  * @returns {Number}
  */
 exports.now = function () {
-	return utcNow + (Date.now() - localNow);
+  return utcNow + (Date.now() - localNow);
 };
 
 /**
@@ -37,8 +37,8 @@ exports.now = function () {
  * @returns {Number}
  */
 exports.epochFromUTC = function (date) {
-	date = moment.isMoment(date) ? date : Date.parse(date);
-	return moment.utc(date).valueOf();
+  date = moment.isMoment(date) ? date : Date.parse(date);
+  return moment.utc(date).valueOf();
 };
 
 /**
@@ -49,10 +49,10 @@ exports.epochFromUTC = function (date) {
  * @returns {Boolean}
  */
 exports.sameInterval = function (date1, date2, interval) {
-	switch (interval) {
-		case exports.DAILY:
-			return getDay(date1).isSame(getDay(date2), 'day');
-	}
+  switch (interval) {
+    case exports.DAILY:
+      return getDay(date1).isSame(getDay(date2), 'day');
+  }
 };
 
 /**
@@ -62,7 +62,7 @@ exports.sameInterval = function (date1, date2, interval) {
  * @returns {Number}
  */
 exports.daysFrom = function (date1, date2) {
-	return getDay(date1).diff(getDay(date2), 'days');
+  return getDay(date1).diff(getDay(date2), 'days');
 };
 
 /**
@@ -72,32 +72,33 @@ exports.daysFrom = function (date1, date2) {
  * @returns {Number}
  */
 exports.millisecondsFrom = function (date1, date2) {
-	date1 = moment.isMoment(date1) ? date1 : Date.parse(date1);
-	date2 = moment.isMoment(date2) ? date2 : Date.parse(date2);
+  date1 = moment.isMoment(date1) ? date1 : Date.parse(date1);
+  date2 = moment.isMoment(date2) ? date2 : Date.parse(date2);
 
-	return moment(date2).diff(moment(date1));
+  return moment(date2).diff(moment(date1));
 };
 
 /**
  * Retrieve long format day text from 'date'
  * @param {Moment} date
  * @param {Number} daysFromNow
+ * @param {String} format
  * @param {Object} grammar
  * @returns {String}
  */
-exports.formatDay = function (date, daysFromNow, grammar) {
-	if (daysFromNow < 2) {
-		const hour = date.hour();
+exports.formatDay = function (date, daysFromNow, format, grammar) {
+  if (daysFromNow < 2) {
+    const hour = date.hour();
 
-		return ((daysFromNow == 1)
-			? grammar.tomorrow
-			: (hour >= exports.DAY_END || hour < exports.DAY_START)
-				? grammar.tonight
-				: grammar.today
-		);
-	}
+    return ((daysFromNow == 1)
+      ? grammar.tomorrow
+      : (hour >= exports.DAY_END || hour < exports.DAY_START)
+        ? grammar.tonight
+        : grammar.today
+    );
+  }
 
-	return date.format('dddd');
+  return date.format(format);
 };
 
 /**
@@ -105,20 +106,20 @@ exports.formatDay = function (date, daysFromNow, grammar) {
  * @param {Object} obj
  */
 exports.parse = function (obj) {
-	function traverse (o) {
-		// Check if is object or array
-		if (!(Array.isArray(o) || isPlainObject(o))) return;
-		for (let prop in o) {
-			// Match prop with keys
-			if (~PARSE_KEYS.indexOf(prop) && ('number' == typeof o[prop] || 'string' == typeof o[prop])) {
-				o[prop] = moment.parseZone(o[prop]);
-			} else {
-				traverse(o[prop]);
-			}
-		}
-	}
+  function traverse (o) {
+    // Check if is object or array
+    if (!(Array.isArray(o) || isPlainObject(o))) return;
+    for (const prop in o) {
+      // Match prop with keys
+      if (~PARSE_KEYS.indexOf(prop) && ('number' == typeof o[prop] || 'string' == typeof o[prop])) {
+        o[prop] = moment.parseZone(o[prop]);
+      } else {
+        traverse(o[prop]);
+      }
+    }
+  }
 
-	traverse(obj);
+  traverse(obj);
 };
 
 /**
@@ -128,7 +129,7 @@ exports.parse = function (obj) {
  * @returns {String}
  */
 exports.getExpires = function (number, key) {
-	return moment.utc().add(number, key).valueOf();
+  return moment.utc().add(number, key).valueOf();
 };
 
 /**
@@ -137,15 +138,15 @@ exports.getExpires = function (number, key) {
  * @returns {Moment}
  */
 function getDay (date) {
-	var d = moment({
-		y: date.year(),
-		M: date.month(),
-		d: date.date(),
-		h: 0,
-		m: 0
-	});
+  var d = moment({
+    y: date.year(),
+    M: date.month(),
+    d: date.date(),
+    h: 0,
+    m: 0
+  });
 
-	return (date.hour() < exports.DAY_START)
-		? d.subtract(1, 'day')
-		: d;
+  return (date.hour() < exports.DAY_START)
+    ? d.subtract(1, 'day')
+    : d;
 }
