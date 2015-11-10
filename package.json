@@ -4,15 +4,15 @@
   "version": "2.1.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
-    "is-plain-obj": "~1.0",
+    "is-plain-obj": "~1.1",
     "moment": "~2.10"
   },
   "devDependencies": {
-    "buddy": "~3.0",
+    "buddy": "~3.1",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*",
-    "transfigure-babel": "~5.8"
+    "transfigure-babel": "~6.1"
   },
   "main": "index.js",
   "repository": "https://github.com/YR/date.git",
