@@ -102,10 +102,11 @@ describe('date', function () {
 		});
 		it('should return simple object containing array with parsed moments', function () {
 			var obj = {
-				times: ["2015-11-10T10:46:31+01:00", "2015-11-10T17:00:00+01:00"]
+				times: ["2015-11-10T10:46:31+01:00", "2015-11-10T17:00:00+01:00", moment.parseZone("2015-11-10T17:00:00+01:00")]
 			};
 			date.parse(obj);
 			expect(moment.isMoment(obj.times[0])).to.be(true);
+			expect(moment.isMoment(obj.times[2])).to.be(true);
 		});
 	});
 });

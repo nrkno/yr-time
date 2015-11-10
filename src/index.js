@@ -126,6 +126,7 @@ exports.parse = function (obj) {
     } else if ('number' == typeof val || 'string' == typeof val) {
       return moment.parseZone(val);
     }
+    return val;
   }
 
   function traverse (o) {
