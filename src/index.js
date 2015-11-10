@@ -3,7 +3,19 @@
 const isPlainObject = require('is-plain-obj')
   , moment = require('moment')
 
-  , PARSE_KEYS = ['start', 'nominalStart', 'end', 'middle', 'rise', 'set', 'created', 'update', 'from', 'to']
+  , PARSE_KEYS = [
+      'created',
+      'end',
+      'from',
+      'middle',
+      'nominalStart',
+      'rise',
+      'set',
+      'start',
+      'times',
+      'to',
+      'update'
+    ]
 
   , localNow = Date.now()
   , utcNow = moment.utc().valueOf();
@@ -106,13 +118,24 @@ exports.formatDay = function (date, daysFromNow, format, grammar) {
  * @param {Object} obj
  */
 exports.parse = function (obj) {
+  function parse (val) {
+    if (Array.isArray(val)) {
+      return val.map((v) => {
+        return moment.parseZone(v);
+      });
+    } else if ('number' == typeof val || 'string' == typeof val) {
+      return moment.parseZone(val);
+    }
+  }
+
   function traverse (o) {
-    // Check if is object or array
+    // Abort if not object or array
     if (!(Array.isArray(o) || isPlainObject(o))) return;
+
     for (const prop in o) {
-      // Match prop with keys
-      if (~PARSE_KEYS.indexOf(prop) && ('number' == typeof o[prop] || 'string' == typeof o[prop])) {
-        o[prop] = moment.parseZone(o[prop]);
+      // Only parse whitelisted keys
+      if (~PARSE_KEYS.indexOf(prop)) {
+        o[prop] = parse(o[prop]);
       } else {
         traverse(o[prop]);
       }
