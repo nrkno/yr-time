@@ -3304,7 +3304,6 @@ require.register('src/index.js', function(require, module, exports) {
     exports.moment = moment;
     
     // Monkey patch Moment for stringify support
-    console.log('patch');
     moment.fn.toJSON = function () {
       return this.format();
     };
