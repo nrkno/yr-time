@@ -3299,7 +3299,12 @@ require.register('src/index.js', function(require, module, exports) {
     exports.TZ_OFFSET = moment().utcOffset();
     exports.WEEKLY = 'weekly';
     
+    // Expose current version of moment
+    // Because of patching, we need to always use this reference
+    exports.moment = moment;
+    
     // Monkey patch Moment for stringify support
+    console.log('patch');
     moment.fn.toJSON = function () {
       return this.format();
     };
@@ -3380,14 +3385,21 @@ require.register('src/index.js', function(require, module, exports) {
     /**
      * Parse date strings into moment instances
      * @param {Object} obj
+     * @returns {Object}
      */
     exports.parse = function (obj) {
+      function isParseable(val) {
+        var type = typeof val === 'undefined' ? 'undefined' : babelHelpers._typeof(val);
+    
+        return 'number' == type || 'string' == type;
+      }
+    
       function parse(val) {
         if (Array.isArray(val)) {
           return val.map(function (v) {
-            return moment.parseZone(v);
+            return isParseable(v) ? moment.parseZone(v) : traverse(v);
           });
-        } else if ('number' == typeof val || 'string' == typeof val) {
+        } else if (isParseable(val)) {
           return moment.parseZone(val);
         }
         return val;
@@ -3395,19 +3407,17 @@ require.register('src/index.js', function(require, module, exports) {
     
       function traverse(o) {
         // Abort if not object or array
-        if (!(Array.isArray(o) || isPlainObject(o))) return;
+        if (!(Array.isArray(o) || isPlainObject(o))) return o;
     
         for (var prop in o) {
           // Only parse whitelisted keys
-          if (~PARSE_KEYS.indexOf(prop)) {
-            o[prop] = parse(o[prop]);
-          } else {
-            traverse(o[prop]);
-          }
+          o[prop] = ~PARSE_KEYS.indexOf(prop) ? parse(o[prop]) : traverse(o[prop]);
         }
+    
+        return o;
       }
     
-      traverse(obj);
+      return traverse(obj);
     };
     
     /**
