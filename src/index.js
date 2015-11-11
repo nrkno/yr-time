@@ -30,6 +30,10 @@ exports.MONTHLY = 'monthly';
 exports.TZ_OFFSET = moment().utcOffset();
 exports.WEEKLY = 'weekly';
 
+// Expose current version of moment
+// Because of patching, we need to always use this reference
+exports.moment = moment;
+
 // Monkey patch Moment for stringify support
 moment.fn.toJSON = function () {
   return this.format();
