@@ -105,7 +105,7 @@ exports.formatDay = function (date, daysFromNow, format, grammar) {
  */
 exports.parse = function (obj) {
   function isParseable(val) {
-    var type = typeof val === 'undefined' ? 'undefined' : babelHelpers._typeof(val);
+    var type = typeof val === 'undefined' ? 'undefined' : babelHelpers.typeof(val);
 
     return 'number' == type || 'string' == type;
   }
