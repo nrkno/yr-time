@@ -1,7 +1,7 @@
 {
   "name": "@yr/date",
   "description": "Moment/date utilities",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "is-plain-obj": "~1.1",

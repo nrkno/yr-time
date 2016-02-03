@@ -3713,7 +3713,7 @@ require.register('src/index.js', function(require, module, exports) {
     // Expose current version of moment
     // Because of patching, we need to always use this reference
     exports.moment = moment;
-    exports.momentPath = require.resolve('moment');
+    exports.momentPath = 'resolve' in require ? require.resolve('moment') : '';
     
     // Monkey patch Moment for stringify support
     moment.fn.toJSON = function () {
