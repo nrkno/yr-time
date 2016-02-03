@@ -5,14 +5,14 @@
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "is-plain-obj": "~1.1",
-    "moment": "~2.10"
+    "moment": "~2.11"
   },
   "devDependencies": {
-    "buddy": "3.1.0",
+    "buddy": "3.1.x",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*",
-    "transfigure-babel": "6.1.20"
+    "transfigure-babel": "6.x.x"
   },
   "main": "src/index.js",
   "repository": "https://github.com/YR/date.git",
