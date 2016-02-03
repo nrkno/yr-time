@@ -3715,8 +3715,6 @@ require.register('src/index.js', function(require, module, exports) {
     exports.moment = moment;
     exports.momentPath = require.resolve('moment');
     
-    console.log(exports.momentPath);
-    
     // Monkey patch Moment for stringify support
     moment.fn.toJSON = function () {
       return this.format();
