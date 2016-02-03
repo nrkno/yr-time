@@ -19,6 +19,9 @@ exports.WEEKLY = 'weekly';
 // Expose current version of moment
 // Because of patching, we need to always use this reference
 exports.moment = moment;
+exports.momentPath = require.resolve('moment');
+
+console.log(exports.momentPath);
 
 // Monkey patch Moment for stringify support
 moment.fn.toJSON = function () {
@@ -105,7 +108,7 @@ exports.formatDay = function (date, daysFromNow, format, grammar) {
  */
 exports.parse = function (obj) {
   function isParseable(val) {
-    var type = typeof val === 'undefined' ? 'undefined' : babelHelpers.typeof(val);
+    var type = typeof val === 'undefined' ? 'undefined' : babelHelpers['typeof'](val);
 
     return 'number' == type || 'string' == type;
   }
