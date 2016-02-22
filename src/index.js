@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * Moment/date utilities
+ * https://github.com/yr/date
+ * @copyright Yr
+ * @license MIT
+ */
+
 const isPlainObject = require('is-plain-obj')
   , moment = require('moment')
 

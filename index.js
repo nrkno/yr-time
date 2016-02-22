@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * Moment/date utilities
+ * https://github.com/yr/date
+ * @copyright Yr
+ * @license MIT
+ */
+
 var isPlainObject = require('is-plain-obj'),
     moment = require('moment'),
     PARSE_KEYS = ['created', 'end', 'from', 'middle', 'nominalStart', 'rise', 'set', 'start', 'times', 'to', 'update'],
@@ -106,7 +113,7 @@ exports.formatDay = function (date, daysFromNow, format, grammar) {
  */
 exports.parse = function (obj) {
   function isParseable(val) {
-    var type = typeof val === 'undefined' ? 'undefined' : babelHelpers['typeof'](val);
+    var type = typeof val;
 
     return 'number' == type || 'string' == type;
   }
