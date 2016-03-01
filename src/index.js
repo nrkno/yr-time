@@ -7,7 +7,10 @@
  * @license MIT
  */
 
-const RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?(?:Z|(?:\.\d{3}Z)|(([+-])(\d{2}):?(\d{2})))?$/
+const DAY_END = 18
+  , DAY_START = DAY_END - 12
+    // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
+  , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?(?:Z|(?:\.\d{3}Z)|(([+-])(\d{2}):?(\d{2})))?$/
   , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})/g;
 
 module.exports = {
@@ -18,6 +21,10 @@ module.exports = {
    */
   create (timeString) {
     return new Time(timeString);
+  },
+
+  now () {
+    return Date.now();
   }
 };
 
@@ -255,8 +262,10 @@ class Time {
    * @returns {Time}
    */
   locale (locale) {
-    this._locale = locale;
-    return this;
+    let instance = this.clone();
+
+    instance._locale = locale;
+    return instance;
   }
 
   /**
@@ -320,6 +329,8 @@ class Time {
     let instance = new Time(this.isValid ? this._date.toISOString() : null);
 
     instance._offset = this._offset;
+    instance._offsetString = this._offsetString;
+    instance._locale = this._locale;
 
     return instance;
   }
@@ -452,34 +463,6 @@ function pad (value, length) {
 // exports.TZ_OFFSET = moment().utcOffset();
 // exports.WEEKLY = 'weekly';
 
-// // Expose current version of moment
-// // Because of patching, we need to always use this reference
-// exports.moment = moment;
-// exports.momentPath = 'resolve' in require ? require.resolve('moment') : '';
-
-// // Monkey patch Moment for stringify support
-// moment.fn.toJSON = function () {
-//   return this.format();
-// };
-
-// /**
-//  * 'Now' relative to UTC and localtime
-//  * @returns {Number}
-//  */
-// exports.now = function () {
-//   return utcNow + (Date.now() - localNow);
-// };
-
-// /**
-//  * Retrieve epoch from UTC string
-//  * @param {Moment|String} date
-//  * @returns {Number}
-//  */
-// exports.epochFromUTC = function (date) {
-//   date = moment.isMoment(date) ? date : Date.parse(date);
-//   return moment.utc(date).valueOf();
-// };
-
 // /**
 //  * Determine if 'date1' and 'date2' fall within same 'interval'
 //  * @param {Moment} date1
@@ -502,19 +485,6 @@ function pad (value, length) {
 //  */
 // exports.daysFrom = function (date1, date2) {
 //   return getDay(date1).diff(getDay(date2), 'days');
-// };
-
-// /**
-//  * Retrieve number of milliseconds between 'date1' and 'date2'
-//  * @param {Moment|String} date1
-//  * @param {Moment|String} date2
-//  * @returns {Number}
-//  */
-// exports.millisecondsFrom = function (date1, date2) {
-//   date1 = moment.isMoment(date1) ? date1 : Date.parse(date1);
-//   date2 = moment.isMoment(date2) ? date2 : Date.parse(date2);
-
-//   return moment(date2).diff(moment(date1));
 // };
 
 // /**

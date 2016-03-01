@@ -5,7 +5,7 @@ var date, en, expect;
 // Make it work in node..
 try {
   date = require('../src/index');
-  en = require('../src/locale/en')
+  en = require('../src/locale/en');
   expect = require('expect.js');
 // .. or browser
 } catch (err) {
