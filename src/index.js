@@ -9,6 +9,21 @@
 
 const DAY_END = 18
   , DAY_START = DAY_END - 12
+  , FLAGS = {
+      Y: 1,
+      M: 2,
+      D: 4,
+      H: 8,
+      m: 16,
+      s: 32
+    }
+  , FLAGS_START_OF = {
+      Y: FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D | FLAGS.M,
+      M: FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D,
+      D: FLAGS.s | FLAGS.m | FLAGS.H,
+      H: FLAGS.s | FLAGS.m,
+      m: FLAGS.s
+    }
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
   , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?(?:Z|(?:\.\d{3}Z)|(([+-])(\d{2}):?(\d{2})))?$/
   , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})/g;
@@ -127,6 +142,50 @@ class Time {
     }
 
     return asFloat ? diff : round(diff);
+  }
+
+  /**
+   * Reset to start of 'dimension'
+   * @param {String} dimension
+   * @param {Number} value
+   * @returns {Time}
+   */
+  startOf (dimension, value) {
+    if (this.isValid) {
+      const flags = FLAGS_START_OF[dimension];
+      let instance = this.clone()
+        , val;
+
+      for (const dim in FLAGS) {
+        if (flags & FLAGS[dim]) {
+          switch (dim) {
+            case 'M':
+              instance._date.setUTCMonth(0);
+              break;
+            case 'D':
+              val = (dimension == 'M' && value) ? value : 1;
+              instance._date.setUTCDate(val);
+              break;
+            case 'H':
+              val = (dimension == 'D' && value) ? value : 0;
+              instance._date.setUTCHours(val);
+              break;
+            case 'm':
+              val = (dimension == 'H' && value) ? value : 0;
+              instance._date.setUTCMinutes(val);
+              break;
+            case 's':
+              val = (dimension == 'm' && value) ? value : 0;
+              instance._date.setUTCSeconds(val);
+              break;
+          }
+        }
+      }
+
+      return instance;
+    }
+
+    return this;
   }
 
   /**

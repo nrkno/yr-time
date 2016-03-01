@@ -132,6 +132,17 @@ describe('time', function () {
     });
   });
 
+  describe('toJSON()', function () {
+    it('should return a string with default TZ offset', function () {
+      expect(date.create('2015-12-31T23:59:59').toJSON()).to.equal('2015-12-31T23:59:59+00:00');
+      expect(date.create('2016-01-01T00:00:00').toJSON()).to.equal('2016-01-01T00:00:00+00:00');
+    });
+    it('should return a string with TZ offset', function () {
+      expect(date.create('2015-12-31T23:59:59-01:00').toJSON()).to.equal('2015-12-31T23:59:59-01:00');
+      expect(date.create('2016-01-01T00:00:00+01:30').toJSON()).to.equal('2016-01-01T00:00:00+01:30');
+    });
+  });
+
   describe('manipulation', function () {
     describe('add()', function () {
       it('should return a new instance with added years', function () {
@@ -184,6 +195,7 @@ describe('time', function () {
         expect(d2.add(75, 'm').minute()).to.equal(0);
       });
     });
+
     describe('subtract()', function () {
       it('should return a new instance with subtracted years', function () {
         var d1 = date.create('2015-12-31T23:15:00')
@@ -233,6 +245,28 @@ describe('time', function () {
         expect(d2.month()).to.equal(11);
         expect(d2.subtract(75, 'm').hour()).to.equal(22);
         expect(d2.subtract(75, 'm').minute()).to.equal(30);
+      });
+    });
+
+    describe('startOf()', function () {
+      it('should set time to start of year', function () {
+        expect(date.create('2015-12-31T23:59:59').startOf('Y').toJSON()).to.equal('2015-01-01T00:00:00+00:00');
+      });
+      it('should set time to start of month', function () {
+        expect(date.create('2015-12-31T23:59:59').startOf('M').toJSON()).to.equal('2015-12-01T00:00:00+00:00');
+      });
+      it('should set time to start of day', function () {
+        expect(date.create('2015-12-31T23:59:59').startOf('D').toJSON()).to.equal('2015-12-31T00:00:00+00:00');
+      });
+      it('should set time to start of hour', function () {
+        expect(date.create('2015-12-31T23:59:59').startOf('H').toJSON()).to.equal('2015-12-31T23:00:00+00:00');
+      });
+      it('should set time to start of minute', function () {
+        expect(date.create('2015-12-31T23:59:59').startOf('m').toJSON()).to.equal('2015-12-31T23:59:00+00:00');
+      });
+      it.only('should set time to custom start value', function () {
+        expect(date.create('2015-12-31T23:59:59').startOf('D', 6).toJSON()).to.equal('2015-12-31T06:00:00+00:00');
+        expect(date.create('2015-12-31T00:00:00').startOf('D', 6).toJSON()).to.equal('2015-12-30T06:00:00+00:00');
       });
     });
   });
@@ -400,17 +434,6 @@ describe('time', function () {
     });
     it('should handle masks when missing locale', function () {
       expect(date.create('2016-01-01T00:00:00').format('MMM')).to.equal('[missing locale]');
-    });
-  });
-
-  describe('toJSON()', function () {
-    it('should return a string with default TZ offset', function () {
-      expect(date.create('2015-12-31T23:59:59').toJSON()).to.equal('2015-12-31T23:59:59+00:00');
-      expect(date.create('2016-01-01T00:00:00').toJSON()).to.equal('2016-01-01T00:00:00+00:00');
-    });
-    it('should return a string with TZ offset', function () {
-      expect(date.create('2015-12-31T23:59:59-01:00').toJSON()).to.equal('2015-12-31T23:59:59-01:00');
-      expect(date.create('2016-01-01T00:00:00+01:30').toJSON()).to.equal('2016-01-01T00:00:00+01:30');
     });
   });
 
