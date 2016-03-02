@@ -7,8 +7,8 @@
  * @license MIT
  */
 
-const DAY_END = 18
-  , DAY_START = DAY_END - 12
+const DEFAULT_DATE = 'Invalid Date'
+  , DEFAULT_OFFSET = '+00:00'
   , FLAGS = {
       Y: 1,
       M: 2,
@@ -28,7 +28,16 @@ const DAY_END = 18
     }
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
   , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/
-  , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g;
+  , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g
+  , UNITS = [
+      'Y',
+      'M',
+      'D',
+      'H',
+      'm',
+      's',
+      'S'
+    ];
 
 module.exports = {
   /**
@@ -51,11 +60,16 @@ class Time {
    * @param {String} timeString
    */
   constructor (timeString) {
-    this._date = 'Invalid Date';
+    this._date = DEFAULT_DATE;
+    this._locale = null;
+    this._offset = 0;
+    this._offsetString = DEFAULT_OFFSET;
     this.isValid = false;
+    this.timeString = DEFAULT_DATE;
 
+    if (timeString == null) timeString = new Date().toISOString();
     // Prevent regex denial of service
-    if (!timeString || timeString.length > 25) return;
+    if (timeString.length > 30) return;
 
     const match = timeString.match(RE_PARSE);
 
@@ -71,20 +85,18 @@ class Time {
       , minute = +match[5] || 0;
 
     // Handle TZ offset
-    if (offset) {
+    if (offset && offset != DEFAULT_OFFSET) {
       const dir = (match[9] == '+') ? 1 : -1;
 
       hour += dir * +match[10];
       minute += dir * +match[11];
       this._offset = dir * ((+match[10] * 60) + +match[11]);
-    } else {
-      this._offset = 0;
+      this._offsetString = offset;
     }
 
     this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
-    this._offsetString = offset || '+00:00';
-    this._locale = null;
     this.isValid = isValid(this._date);
+    this.timeString = this.toString();
   }
 
   /**
@@ -110,25 +122,35 @@ class Time {
   }
 
   /**
-   * Compute difference between 'time' of 'unit' (from Moment.js)
+   * Compute difference between 'time' of 'unit'
+   * (from Moment.js)
    * @param {Time} time
    * @param {String} unit
-   * @param {Boolean} asFloat
+   * @param {Boolean} [asFloat]
+   * @param {Number} [value]
    * @returns {Number}
    */
-  diff (time, unit, asFloat) {
+  diff (time, unit, asFloat, value) {
     if (!this.isValid) return NaN;
     if (!time.isValid) return NaN;
 
     unit = normalizeUnit(unit);
 
-    let diff = 0;
+    let diff = 0
+      , t1 = this
+      , t2 = time;
+
+    // Reset to start of if custom value (will result in whole delta)
+    if (value != null) {
+      t1 = t1.startOf(unit, value);
+      t2 = t2.startOf(unit, value);
+    }
 
     if (unit == 'Y' || unit == 'M') {
-      diff = this._monthDiff(time);
+      diff = t1._monthDiff(t2);
       if (unit == 'Y') diff /= 12;
     } else {
-      const delta = this._date - time._date;
+      const delta = t1._date - t2._date;
 
       switch (unit) {
         case 'D':
@@ -153,6 +175,7 @@ class Time {
 
   /**
    * Reset to start of 'unit'
+   * Returns new instance
    * @param {String} unit
    * @param {Number} [value]
    * @returns {Time}
@@ -163,39 +186,65 @@ class Time {
 
       const flags = FLAGS_START_OF[unit];
       let instance = this.clone()
+        , d = instance._date
         , val;
 
       for (const dim in FLAGS) {
         if (flags & FLAGS[dim]) {
           switch (dim) {
             case 'M':
-              instance._date.setUTCMonth(0);
+              val = 0;
+              if (unit == 'Y' && value != null) {
+                val = value;
+                if (val > d.getUTCMonth()) d.setUTCFullYear(d.getUTCFullYear() - 1);
+              }
+              d.setUTCMonth(val);
               break;
             case 'D':
-              val = (unit == 'M' && value) ? value : 1;
-              instance._date.setUTCDate(val);
+              val = 1;
+              if (unit == 'M' && value != null) {
+                val = value;
+                if (val > d.getUTCDate()) d.setUTCMonth(d.getUTCMonth() - 1);
+              }
+              d.setUTCDate(val);
               break;
             case 'H':
-              val = (unit == 'D' && value) ? value : 0;
-              instance._date.setUTCHours(val);
+              val = 0;
+              if (unit == 'D' && value != null) {
+                val = value;
+                if (val > d.getUTCHours()) d.setUTCDate(d.getUTCDate() - 1);
+              }
+              d.setUTCHours(val);
               break;
             case 'm':
-              val = (unit == 'H' && value) ? value : 0;
-              instance._date.setUTCMinutes(val);
+              val = 0;
+              if (unit == 'H' && value != null) {
+                val = value;
+                if (val > d.getUTCMinutes()) d.setUTCHours(d.getUTCHours() - 1);
+              }
+              d.setUTCMinutes(val);
               break;
             case 's':
-              val = (unit == 'm' && value) ? value : 0;
-              instance._date.setUTCSeconds(val);
+              val = 0;
+              if (unit == 'm' && value != null) {
+                val = value;
+                if (val > d.getUTCSeconds()) d.setUTCMinutes(d.getUTCMinutes() - 1);
+              }
+              d.setUTCSeconds(val);
               break;
             case 'S':
-              val = (unit == 's' && value) ? value : 0;
-              instance._date.setUTCMilliseconds(val);
+              val = 0;
+              if (unit == 's' && value != null) {
+                val = value;
+                if (val > d.getUTCMilliseconds()) d.setUTCSeconds(d.getUTCSeconds() - 1);
+              }
+              d.setUTCMilliseconds(val);
               break;
           }
         }
       }
 
-      return instance;
+      return update(instance);
     }
 
     return this;
@@ -203,6 +252,7 @@ class Time {
 
   /**
    * Get/set full year
+   * Returns new instance when setting
    * @param {Number} [value]
    * @returns {Number|Time}
    */
@@ -213,6 +263,7 @@ class Time {
 
   /**
    * Get/set month (0-11)
+   * Returns new instance when setting
    * @param {Number} [value]
    * @returns {Number|Time}
    */
@@ -223,6 +274,7 @@ class Time {
 
   /**
    * Get/set date (1-31)
+   * Returns new instance when setting
    * @param {Number} [value]
    * @returns {Number|Time}
    */
@@ -241,6 +293,7 @@ class Time {
 
   /**
    * Get/set hour (0-23)
+   * Returns new instance when setting
    * @param {Number} [value]
    * @returns {Number|Time}
    */
@@ -251,6 +304,7 @@ class Time {
 
   /**
    * Get/set minute (0-59)
+   * Returns new instance when setting
    * @param {Number} [value]
    * @returns {Number|Time}
    */
@@ -261,6 +315,7 @@ class Time {
 
   /**
    * Get/set second (0-59)
+   * Returns new instance when setting
    * @param {Number} [value]
    * @returns {Number|Time}
    */
@@ -271,6 +326,7 @@ class Time {
 
   /**
    * Get/set millisecond (0-999)
+   * Returns new instance when setting
    * @param {Number} [value]
    * @returns {Number|Time}
    */
@@ -283,43 +339,53 @@ class Time {
    * Compare 'time' with 'unit' and determine is similar
    * @param {Time} time
    * @param {String} [unit]
+   * @param {Number} [value]
    * @returns {Boolean}
    */
-  isSame (time, unit) {
+  isSame (time, unit, value) {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
 
     if (!unit || unit == 'S') return +this._date === +time._date;
 
+    let t1 = this
+      , t2 = time;
+
+    // Reset to start of if custom value
+    if (value != null) {
+      t1 = t1.startOf(unit, value);
+      t2 = t2.startOf(unit, value);
+    }
+
     switch (unit) {
       case 'Y':
-        return this.year() == time.year();
+        return t1.year() == t2.year();
       case 'M':
-        return this.year() == time.year()
-          && this.month() == time.month();
+        return t1.year() == t2.year()
+          && t1.month() == t2.month();
       case 'D':
-        return this.year() == time.year()
-          && this.month() == time.month()
-          && this.date() == time.date();
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date();
       case 'H':
-        return this.year() == time.year()
-          && this.month() == time.month()
-          && this.date() == time.date()
-          && this.hour() == time.hour();
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date()
+          && t1.hour() == t2.hour();
       case 'm':
-        return this.year() == time.year()
-          && this.month() == time.month()
-          && this.date() == time.date()
-          && this.hour() == time.hour()
-          && this.minute() == time.minute();
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date()
+          && t1.hour() == t2.hour()
+          && t1.minute() == t2.minute();
       case 's':
-        return this.year() == time.year()
-          && this.month() == time.month()
-          && this.date() == time.date()
-          && this.hour() == time.hour()
-          && this.minute() == time.minute()
-          && this.second() == time.second();
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date()
+          && t1.hour() == t2.hour()
+          && t1.minute() == t2.minute()
+          && t1.second() == t2.second();
     }
   }
 
@@ -441,12 +507,9 @@ class Time {
    * @returns {Time}
    */
   clone () {
-    let instance = new Time(this.isValid ? this._date.toISOString() : null);
+    let instance = new Time(this.timeString);
 
-    instance._offset = this._offset;
-    instance._offsetString = this._offsetString;
     instance._locale = this._locale;
-
     return instance;
   }
 
@@ -458,15 +521,15 @@ class Time {
    * @returns {Time}
    */
   _set (value, method) {
-    let instance = this.clone();
+    let instance = this.clone()
+      , d = instance._date;
 
-    instance._date[method](value);
-    instance.isValid = isValid(instance._date);
-    return instance;
+    d[method](value);
+    return update(instance);
   }
 
   /**
-   * Add/subtract 'value' in 'unit' (Y|M|D|H|m|s)
+   * Add/subtract 'value' in 'unit'
    * Returns new instance
    * @param {Number} value
    * @param {String} unit
@@ -474,41 +537,43 @@ class Time {
    */
   _manipulate (value, unit) {
     if (this.isValid) {
-      let instance = this.clone();
+      let instance = this.clone()
+        , d = instance._date;
 
       switch (normalizeUnit(unit)) {
         case 'Y':
-          instance._date.setUTCFullYear(this.year() + value);
+          d.setUTCFullYear(d.getUTCFullYear() + value);
           break;
         case 'M':
-          instance._date.setUTCMonth(this.month() + value);
+          d.setUTCMonth(d.getUTCMonth() + value);
           break;
         case 'D':
         case 'd':
-          instance._date.setUTCDate(this.date() + value);
+          d.setUTCDate(d.getUTCDate() + value);
           break;
         case 'H':
-          instance._date.setUTCHours(this.hour() + value);
+          d.setUTCHours(d.getUTCHours() + value);
           break;
         case 'm':
-          instance._date.setUTCMinutes(this.minute() + value);
+          d.setUTCMinutes(d.getUTCMinutes() + value);
           break;
         case 's':
-          instance._date.setUTCSeconds(this.second() + value);
+          d.setUTCSeconds(d.getUTCSeconds() + value);
           break;
         case 'S':
-          instance._date.setUTCMilliseconds(this.millisecond() + value);
+          d.setUTCMilliseconds(s.getUTCMilliseconds() + value);
           break;
       }
 
-      return instance;
+      return update(instance);
     }
 
     return this;
   }
 
   /**
-   * Compute difference between 'time' in months (from Moment.js)
+   * Compute difference between 'time' in months
+   * (from Moment.js)
    * @param {Time} time
    * @returns {Number}
    */
@@ -531,15 +596,45 @@ class Time {
   }
 
   /**
+   * Retrieve stringified
+   * @returns {String}
+   */
+  toString () {
+    if (!this.isValid) return 'Invalid Date';
+
+    const d = this._date;
+    let str = '';
+
+    if (this._offset != 0) {
+      // Reverse offset
+      d.setUTCMinutes(d.getUTCMinutes() - this._offset);
+      str = d.toISOString();
+      d.setUTCMinutes(d.getUTCMinutes() + this._offset);
+    } else {
+      str = d.toISOString();
+    }
+
+    return str.replace('Z', this._offsetString);
+  }
+
+  /**
    * Return stringified
    * @returns {String}
    */
   toJSON () {
-    // Reverse offset
-    const d = this._manipulate(-this._offset, 'm');
-
-    return `${d.year()}-${pad(d.month() + 1)}-${pad(d.date())}T${pad(d.hour())}:${pad(d.minute())}:${pad(d.second())}${this._offsetString}`;
+    return this.timeString;
   }
+}
+
+/**
+ * Update 'instance' state
+ * @param {Time} instance
+ * @returns {Time}
+ */
+function update (instance) {
+  instance.isValid = isValid(instance._date);
+  instance.timeString = instance.toString();
+  return instance;
 }
 
 /**
@@ -652,30 +747,6 @@ function pad (value, length) {
 // // Local timezone offset
 // exports.TZ_OFFSET = moment().utcOffset();
 // exports.WEEKLY = 'weekly';
-
-// /**
-//  * Determine if 'date1' and 'date2' fall within same 'interval'
-//  * @param {Moment} date1
-//  * @param {Moment} date2
-//  * @param {String} interval
-//  * @returns {Boolean}
-//  */
-// exports.sameInterval = function (date1, date2, interval) {
-//   switch (interval) {
-//     case exports.DAILY:
-//       return getDay(date1).isSame(getDay(date2), 'day');
-//   }
-// };
-
-// /**
-//  * Retrieve number of days between 'date1' and 'date2'
-//  * @param {Moment} date1
-//  * @param {Moment} date2
-//  * @returns {Number}
-//  */
-// exports.daysFrom = function (date1, date2) {
-//   return getDay(date1).diff(getDay(date2), 'days');
-// };
 
 // /**
 //  * Retrieve long format day text from 'date'

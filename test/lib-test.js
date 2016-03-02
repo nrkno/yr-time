@@ -9,6 +9,7 @@ try {
   expect = require('expect.js');
 // .. or browser
 } catch (err) {
+  console.log(err.stack);
   time = require('src/index.js');
   expect = window.expect;
 }
@@ -21,6 +22,9 @@ describe('time', function () {
     });
     it('should handle arbitrarily long time strings', function () {
       expect(time.create('foo000000oooooooooooooooooooooooooo')._date).to.equal('Invalid Date');
+    });
+    it('should default to now if no time string', function () {
+      expect(time.create()._date).to.be.a(Date);
     });
     it('should handle incomplete time strings', function () {
       expect(time.create('2016')._date).to.be.a(Date);
@@ -48,6 +52,29 @@ describe('time', function () {
       expect(time.create('2016-01-01T00:00:00+01:00')._date.toISOString()).to.equal('2016-01-01T01:00:00.000Z');
       expect(time.create('2016-01-01T00:00:00-01:30')._offset).to.equal(-90);
       expect(time.create('2016-01-01T00:00:00-01:30')._date.toISOString()).to.equal('2015-12-31T22:30:00.000Z');
+    });
+  });
+
+  describe('toString()', function () {
+    it('should return a string with default TZ offset', function () {
+      expect(time.create('2015-12-31T23:59:59').toString()).to.equal('2015-12-31T23:59:59.000+00:00');
+      expect(time.create('2016-01-01T00:00:00').toString()).to.equal('2016-01-01T00:00:00.000+00:00');
+    });
+    it('should return a string with TZ offset', function () {
+      expect(time.create('2015-12-31T23:59:59-01:00').toString()).to.equal('2015-12-31T23:59:59.000-01:00');
+      expect(time.create('2016-01-01T00:00:00+01:30').toString()).to.equal('2016-01-01T00:00:00.000+01:30');
+    });
+  });
+
+  describe('toJSON()', function () {
+    it('should support stringifying with default TZ offset', function () {
+      expect(JSON.stringify({ time: time.create('2015-12-31T23:59:59') })).to.equal('{"time":"2015-12-31T23:59:59.000+00:00"}');
+      expect(JSON.stringify({ time: time.create('2016-01-01T00:00:00') })).to.equal('{"time":"2016-01-01T00:00:00.000+00:00"}');
+    });
+    it('should support stringifying with TZ offset', function () {
+      expect(time.create('2015-12-31T23:59:59-01:00').toString()).to.equal('2015-12-31T23:59:59.000-01:00');
+      expect(JSON.stringify({ time: time.create('2015-12-31T23:59:59-01:00') })).to.equal('{"time":"2015-12-31T23:59:59.000-01:00"}');
+      expect(JSON.stringify({ time: time.create('2016-01-01T00:00:00+01:30') })).to.equal('{"time":"2016-01-01T00:00:00.000+01:30"}');
     });
   });
 
@@ -201,17 +228,6 @@ describe('time', function () {
     });
   });
 
-  describe('toJSON()', function () {
-    it('should return a string with default TZ offset', function () {
-      expect(time.create('2015-12-31T23:59:59').toJSON()).to.equal('2015-12-31T23:59:59+00:00');
-      expect(time.create('2016-01-01T00:00:00').toJSON()).to.equal('2016-01-01T00:00:00+00:00');
-    });
-    it('should return a string with TZ offset', function () {
-      expect(time.create('2015-12-31T23:59:59-01:00').toJSON()).to.equal('2015-12-31T23:59:59-01:00');
-      expect(time.create('2016-01-01T00:00:00+01:30').toJSON()).to.equal('2016-01-01T00:00:00+01:30');
-    });
-  });
-
   describe('manipulation', function () {
     describe('add()', function () {
       it('should return a new instance with added years', function () {
@@ -319,23 +335,27 @@ describe('time', function () {
 
     describe('startOf()', function () {
       it('should set time to start of year', function () {
-        expect(time.create('2015-12-31T23:59:59').startOf('Y').toJSON()).to.equal('2015-01-01T00:00:00+00:00');
+        expect(time.create('2015-12-31T23:59:59').startOf('Y')._date.toISOString()).to.equal('2015-01-01T00:00:00.000Z');
       });
       it('should set time to start of month', function () {
-        expect(time.create('2015-12-31T23:59:59').startOf('M').toJSON()).to.equal('2015-12-01T00:00:00+00:00');
+        expect(time.create('2015-12-31T23:59:59').startOf('M')._date.toISOString()).to.equal('2015-12-01T00:00:00.000Z');
       });
       it('should set time to start of day', function () {
-        expect(time.create('2015-12-31T23:59:59').startOf('D').toJSON()).to.equal('2015-12-31T00:00:00+00:00');
+        expect(time.create('2015-12-31T23:59:59').startOf('D')._date.toISOString()).to.equal('2015-12-31T00:00:00.000Z');
       });
       it('should set time to start of hour', function () {
-        expect(time.create('2015-12-31T23:59:59').startOf('H').toJSON()).to.equal('2015-12-31T23:00:00+00:00');
+        expect(time.create('2015-12-31T23:59:59').startOf('H')._date.toISOString()).to.equal('2015-12-31T23:00:00.000Z');
       });
       it('should set time to start of minute', function () {
-        expect(time.create('2015-12-31T23:59:59').startOf('m').toJSON()).to.equal('2015-12-31T23:59:00+00:00');
+        expect(time.create('2015-12-31T23:59:59').startOf('m')._date.toISOString()).to.equal('2015-12-31T23:59:00.000Z');
+      });
+      it('should set time to start of second', function () {
+        expect(time.create('2015-12-31T23:59:59').startOf('s')._date.toISOString()).to.equal('2015-12-31T23:59:59.000Z');
       });
       it('should set time to custom start value', function () {
-        expect(time.create('2015-12-31T23:59:59').startOf('D', 6).toJSON()).to.equal('2015-12-31T06:00:00+00:00');
-        expect(time.create('2015-12-31T00:00:00').startOf('D', 6).toJSON()).to.equal('2015-12-30T06:00:00+00:00');
+        expect(time.create('2015-12-31T23:59:59').startOf('D', 6)._date.toISOString()).to.equal('2015-12-31T06:00:00.000Z');
+        expect(time.create('2015-12-31T00:00:00').startOf('D', 6)._date.toISOString()).to.equal('2015-12-30T06:00:00.000Z');
+        expect(time.create('2015-12-31T23:59:59').startOf('Y', 4)._date.toISOString()).to.equal('2015-05-01T00:00:00.000Z');
       });
     });
   });
@@ -365,6 +385,7 @@ describe('time', function () {
       expect(time.create('2016-01-01T00:00:00').diff(time.create('2015-12-31T00:00:00'), 'D', false)).to.equal(1);
       expect(time.create('2015-12-31T00:00:00').diff(time.create('2016-01-01T00:00:00'), 'D', false)).to.equal(-1);
       expect(time.create('2016-01-01T00:00:00').diff(time.create('2015-12-31T06:00:00'), 'D', false)).to.equal(0);
+      expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', false)).to.equal(0);
     });
     it('should return the difference in days between two instances as float', function () {
       expect(time.create('2016-01-01T00:00:00').diff(time.create('2015-12-31T00:00:00'), 'D', true)).to.equal(1);
@@ -390,6 +411,10 @@ describe('time', function () {
       expect(time.create('2016-01-01T01:00:00').diff(time.create('2016-01-01T00:59:00'), 'm', true)).to.equal(1);
       expect(time.create('2016-01-01T00:59:00').diff(time.create('2016-01-01T01:00:00'), 'm', true)).to.equal(-1);
       expect(time.create('2016-01-01T01:00:00').diff(time.create('2016-01-01T00:59:30'), 'm', true)).to.equal(0.5);
+    });
+    it('should handle custom start values', function () {
+      expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', false, 6)).to.equal(1);
+      expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', true, 6)).to.equal(1);
     });
   });
 
@@ -418,6 +443,15 @@ describe('time', function () {
     });
     it('should return "true" for same minute', function () {
       expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:59'), 'm')).to.equal(true);
+    });
+    it('should return "true" for same second', function () {
+      expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:00'), 's')).to.equal(true);
+    });
+    it('should handle custom start values', function () {
+      expect(time.create('2016-01-01T05:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D', 6)).to.equal(false);
+      expect(time.create('2016-01-01T06:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D', 6)).to.equal(true);
+      expect(time.create('2016-05-01T00:00:00').isSame(time.create('2016-07-00T00:00:00'), 'Y', 5)).to.equal(false);
+      expect(time.create('2016-06-01T00:00:00').isSame(time.create('2016-07-00T00:00:00'), 'Y', 5)).to.equal(true);
     });
   });
 
