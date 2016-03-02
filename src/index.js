@@ -813,13 +813,3 @@ function pad (value, length) {
 
 //   return date.format(format);
 // };
-
-// /**
-//  * Get expiry as epoch timestamp
-//  * @param {Number} number
-//  * @param {String} key
-//  * @returns {String}
-//  */
-// exports.getExpires = function (number, key) {
-//   return moment.utc().add(number, key).valueOf();
-// };

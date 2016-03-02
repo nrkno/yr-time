@@ -44,5 +44,8 @@
     "October",
     "November",
     "December"
-  ]
+  ],
+  "today": "today",
+  "tomorrow": "tomorrow",
+  "tonight": "tonight"
 }

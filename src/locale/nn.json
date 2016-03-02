@@ -1,0 +1,51 @@
+{
+  "daysShort": [
+    "su.",
+    "må.",
+    "ty.",
+    "on.",
+    "to.",
+    "fr.",
+    "lau."
+  ],
+  "days": [
+    "sundag",
+    "måndag",
+    "tysdag",
+    "onsdag",
+    "torsdag",
+    "fredag",
+    "laurdag"
+  ],
+  "monthsShort": [
+    "jan.",
+    "feb.",
+    "mars",
+    "apr.",
+    "mai",
+    "juni",
+    "juli",
+    "aug.",
+    "sep.",
+    "okt.",
+    "nov.",
+    "des."
+  ],
+  "months": [
+    "januar",
+    "februar",
+    "mars",
+    "april",
+    "mai",
+    "juni",
+    "juli",
+    "august",
+    "september",
+    "oktober",
+    "november",
+    "desember"
+  ],
+  "today": "i dag",
+  "tomorrow": "i morgon",
+  "tonight": "i natt"
+}
