@@ -9,8 +9,8 @@ try {
   expect = require('expect.js');
 // .. or browser
 } catch (err) {
-  console.log(err.stack);
-  time = require('src/index.js');
+  time = require('test/index.js').time;
+  en = require('test/index.js').en;
   expect = window.expect;
 }
 
@@ -553,11 +553,15 @@ describe('time', function () {
       it('should handle masks when missing locale', function () {
         expect(time.create('2016-01-01T00:00:00').format('MMM')).to.equal('[missing locale]');
       });
-      it.skip('should handle relative day masks', function () {
-        expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr', 0, 6, 18)).to.equal('Today');
+      it('should handle relative day masks', function () {
+        time.init({ dayStartsAt: 6 });
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr', 0)).to.equal('Today');
         expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr')).to.equal('Fri');
-        expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 0, 6, 18)).to.equal('Today');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 0)).to.equal('Today');
         expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr')).to.equal('Friday');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 1)).to.equal('Tomorrow');
+        expect(time.create('2016-01-01T19:00:00').locale(en).format('dddr', 0)).to.equal('Tonight');
+        time.init();
       });
     });
   });

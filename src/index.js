@@ -476,13 +476,15 @@ class Time {
    * Format into string based on 'mask'
    * @param {String} mask
    * @param {Number} [daysFromNow]
-   * @param {Number} [dayStart]
-   * @param {Number} [nightStart]
    * @returns {String}
    */
-  format (mask, daysFromNow, dayStart, nightStart) {
+  format (mask, daysFromNow) {
     // Prevent regex denial of service
     if (!mask || mask.length > 100) return '';
+
+    const relativeDay = (daysFromNow != null)
+      ? this._getRelativeDay(daysFromNow)
+      : '';
 
     return mask.replace(RE_TOKEN, (match) => {
       switch (match) {
@@ -502,28 +504,18 @@ class Time {
           return this.date();
         case 'DD':
           return pad(this.date());
+        case 'ddr':
+          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
+          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
+        case 'dddr':
+          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
+          return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
         case 'd':
           return this.day();
         case 'dd':
           return pad(this.day());
-        case 'ddr':
-        case 'dddr':
-          if (daysFromNow != null && daysFromNow < 2) {
-            const hour = this.hour()
-              , relativeDay = (daysFromNow == 1)
-                  ? 'tomorrow'
-                  : (hour >= nightStart || hour < dayStart)
-                    ? 'tonight'
-                    : 'today';
-
-            console.log(hour, relativeDay)
-            return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
-          }
-          // Fall through if not relative
-        case 'ddr':
         case 'ddd':
           return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
-        case 'dddr':
         case 'dddd':
           return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
         case 'H':
@@ -576,16 +568,22 @@ class Time {
     return update(instance);
   }
 
-  _getRelativeDay (daysFromNow, dayStart, nightStart) {
+  /**
+   * Retrieve relative day type based on number of days from now
+   * @param {Number} daysFromNow
+   * @returns {String}
+   */
+  _getRelativeDay (daysFromNow) {
     if (daysFromNow != null && daysFromNow < 2) {
       const hour = this.hour();
 
       return (daysFromNow == 1)
         ? 'tomorrow'
-        : (hour >= nightStart || hour < dayStart)
+        : (hour >= nightStartsAt || hour < dayStartsAt)
           ? 'tonight'
           : 'today';
     }
+    return '';
   }
 
   /**
