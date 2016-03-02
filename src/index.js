@@ -10,7 +10,22 @@
 const isPlainObject = require('is-plain-obj')
 
   , DEFAULT_DATE = 'Invalid Date'
+  , DEFAULT_DAY_STARTS_AT = 0
+  , DEFAULT_NIGHT_STARTS_AT = 18
   , DEFAULT_OFFSET = '+00:00'
+  , DEFAULT_PARSE_KEYS = [
+      'created',
+      'end',
+      'from',
+      'middle',
+      'nominalStart',
+      'rise',
+      'set',
+      'start',
+      'times',
+      'to',
+      'update'
+    ]
   , FLAGS = {
       Y: 1,
       M: 2,
@@ -31,21 +46,21 @@ const isPlainObject = require('is-plain-obj')
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
   , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/
   , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g;
+let dayStartsAt = DEFAULT_DAY_STARTS_AT
+  , nightStartsAt = DEFAULT_NIGHT_STARTS_AT
+  , parseKeys = DEFAULT_PARSE_KEYS;
 
 module.exports = {
-  PARSE_KEYS: [
-    'created',
-    'end',
-    'from',
-    'middle',
-    'nominalStart',
-    'rise',
-    'set',
-    'start',
-    'times',
-    'to',
-    'update'
-  ],
+  /**
+   * Initialize with defaults
+   * @param {Object} [options]
+   */
+  init (options) {
+    options = options || {};
+    dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
+    nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
+    parseKeys = options.parseKeys || DEFAULT_PARSE_KEYS;
+  },
 
   /**
    * Instance factory
@@ -66,30 +81,30 @@ module.exports = {
    * @returns {Object}
    */
   parse (obj) {
-    const parseValue = (value) => {
+    function parseValue (value) {
       if (Array.isArray(value)) {
         return value.map((value) => {
-          return ('string' == typeof value) ? this.create(value) : traverse(value);
+          return ('string' == typeof value) ? new Time(value) : traverse(value);
         });
       } else if ('string' == typeof value) {
-        return this.create(value);
+        return new Time(value);
       }
       return value;
-    };
+    }
 
-    const traverse = (o) => {
+    function traverse (o) {
       // Abort if not object or array
       if (!(Array.isArray(o) || isPlainObject(o))) return o;
 
       for (const prop in o) {
         // Only parse whitelisted keys
-        o[prop] = (~this.PARSE_KEYS.indexOf(prop))
+        o[prop] = (~parseKeys.indexOf(prop))
           ? parseValue(o[prop])
           : traverse(o[prop]);
       }
 
       return o;
-    };
+    }
 
     return traverse(obj);
   }
@@ -168,10 +183,9 @@ class Time {
    * @param {Time} time
    * @param {String} unit
    * @param {Boolean} [asFloat]
-   * @param {Number} [value]
    * @returns {Number}
    */
-  diff (time, unit, asFloat, value) {
+  diff (time, unit, asFloat) {
     if (!this.isValid) return NaN;
     if (!time.isValid) return NaN;
 
@@ -181,16 +195,16 @@ class Time {
       , t1 = this
       , t2 = time;
 
-    // Reset to start if custom value (will result in whole delta)
-    if (value != null) {
-      t1 = t1.startOf(unit, value);
-      t2 = t2.startOf(unit, value);
-    }
-
     if (unit == 'Y' || unit == 'M') {
       diff = t1._monthDiff(t2);
       if (unit == 'Y') diff /= 12;
     } else {
+      // Correct for custom day start
+      if (unit == 'D' && !asFloat) {
+        t1 = t1.startOf('D');
+        t2 = t2.startOf('D');
+      }
+
       const delta = t1._date - t2._date;
 
       switch (unit) {
@@ -218,68 +232,38 @@ class Time {
    * Reset to start of 'unit'
    * Returns new instance
    * @param {String} unit
-   * @param {Number} [value]
    * @returns {Time}
    */
-  startOf (unit, value) {
+  startOf (unit) {
     if (this.isValid) {
       unit = normalizeUnit(unit);
 
       const flags = FLAGS_START_OF[unit];
       let instance = this.clone()
-        , d = instance._date
-        , val;
+        , d = instance._date;
 
       for (const dim in FLAGS) {
         if (flags & FLAGS[dim]) {
           switch (dim) {
             case 'M':
-              val = 0;
-              if (unit == 'Y' && value != null) {
-                val = value;
-                if (val > d.getUTCMonth()) d.setUTCFullYear(d.getUTCFullYear() - 1);
-              }
-              d.setUTCMonth(val);
+              d.setUTCMonth(0);
               break;
             case 'D':
-              val = 1;
-              if (unit == 'M' && value != null) {
-                val = value;
-                if (val > d.getUTCDate()) d.setUTCMonth(d.getUTCMonth() - 1);
-              }
-              d.setUTCDate(val);
+              d.setUTCDate(1);
               break;
             case 'H':
-              val = 0;
-              if (unit == 'D' && value != null) {
-                val = value;
-                if (val > d.getUTCHours()) d.setUTCDate(d.getUTCDate() - 1);
-              }
-              d.setUTCHours(val);
+              // Adjust day if less than day start hour
+              if (unit == 'D' && dayStartsAt > d.getUTCHours()) d.setUTCDate(d.getUTCDate() - 1);
+              d.setUTCHours(dayStartsAt);
               break;
             case 'm':
-              val = 0;
-              if (unit == 'H' && value != null) {
-                val = value;
-                if (val > d.getUTCMinutes()) d.setUTCHours(d.getUTCHours() - 1);
-              }
-              d.setUTCMinutes(val);
+              d.setUTCMinutes(0);
               break;
             case 's':
-              val = 0;
-              if (unit == 'm' && value != null) {
-                val = value;
-                if (val > d.getUTCSeconds()) d.setUTCMinutes(d.getUTCMinutes() - 1);
-              }
-              d.setUTCSeconds(val);
+              d.setUTCSeconds(0);
               break;
             case 'S':
-              val = 0;
-              if (unit == 's' && value != null) {
-                val = value;
-                if (val > d.getUTCMilliseconds()) d.setUTCSeconds(d.getUTCSeconds() - 1);
-              }
-              d.setUTCMilliseconds(val);
+              d.setUTCMilliseconds(0);
               break;
           }
         }
@@ -326,10 +310,15 @@ class Time {
 
   /**
    * Retrieve day of week (0-6)
-   * @returns {Number}
+   * Returns new instance when setting
+   * @param {Number} [value]
+   * @returns {Number|Time}
    */
-  day () {
-    return this._date.getUTCDay();
+  day (value) {
+    const day = this._date.getUTCDay();
+
+    if (value != null) return this._set(this.date() + value - day, 'setUTCDate');
+    return day;
   }
 
   /**
@@ -380,10 +369,9 @@ class Time {
    * Compare 'time', limited by 'unit', and determine if is similar
    * @param {Time} time
    * @param {String} [unit]
-   * @param {Number} [value]
    * @returns {Boolean}
    */
-  isSame (time, unit, value) {
+  isSame (time, unit) {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
@@ -393,10 +381,10 @@ class Time {
     let t1 = this
       , t2 = time;
 
-    // Reset to start of if custom value
-    if (value != null) {
-      t1 = t1.startOf(unit, value);
-      t2 = t2.startOf(unit, value);
+    // Correct for custom day start
+    if (unit == 'D') {
+      t1 = t1.startOf(unit);
+      t2 = t2.startOf(unit);
     }
 
     switch (unit) {
@@ -650,7 +638,7 @@ class Time {
    * @returns {Number}
    */
   _monthDiff (time) {
-    const wholeMonthDiff = ((time.year() - this.year()) * 12) + (time.month() - this.month())
+    const wholeMonthDiff = ((time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12) + (time._date.getUTCMonth() - this._date.getUTCMonth())
       , anchor = this._manipulate(wholeMonthDiff, 'M');
     let adjust;
 
@@ -811,14 +799,3 @@ function pad (value, length) {
 
   return value;
 }
-
-// exports.ANNUALLY = 'annually';
-// exports.DAILY = 'daily';
-// exports.DAY_END = 18;
-// exports.DAY_START = exports.DAY_END - 12;
-// exports.HOURLY = 'hourly';
-// exports.MONTHLY = 'monthly';
-// // Local timezone offset
-// exports.TZ_OFFSET = moment().utcOffset();
-// exports.WEEKLY = 'weekly';
-

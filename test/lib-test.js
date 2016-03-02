@@ -353,10 +353,11 @@ describe('time', function () {
         it('should set time to start of second', function () {
           expect(time.create('2015-12-31T23:59:59').startOf('s')._date.toISOString()).to.equal('2015-12-31T23:59:59.000Z');
         });
-        it('should set time to custom start value', function () {
-          expect(time.create('2015-12-31T23:59:59').startOf('D', 6)._date.toISOString()).to.equal('2015-12-31T06:00:00.000Z');
-          expect(time.create('2015-12-31T00:00:00').startOf('D', 6)._date.toISOString()).to.equal('2015-12-30T06:00:00.000Z');
-          expect(time.create('2015-12-31T23:59:59').startOf('Y', 4)._date.toISOString()).to.equal('2015-05-01T00:00:00.000Z');
+        it('should set time to custom day start value', function () {
+          time.init({ dayStartsAt: 6 });
+          expect(time.create('2015-12-31T23:59:59').startOf('D')._date.toISOString()).to.equal('2015-12-31T06:00:00.000Z');
+          expect(time.create('2015-12-31T00:00:00').startOf('D')._date.toISOString()).to.equal('2015-12-30T06:00:00.000Z');
+          time.init();
         });
       });
     });
@@ -385,7 +386,7 @@ describe('time', function () {
       it('should return the difference in days between two instances', function () {
         expect(time.create('2016-01-01T00:00:00').diff(time.create('2015-12-31T00:00:00'), 'D', false)).to.equal(1);
         expect(time.create('2015-12-31T00:00:00').diff(time.create('2016-01-01T00:00:00'), 'D', false)).to.equal(-1);
-        expect(time.create('2016-01-01T00:00:00').diff(time.create('2015-12-31T06:00:00'), 'D', false)).to.equal(0);
+        expect(time.create('2016-01-01T00:00:00').diff(time.create('2015-12-31T06:00:00'), 'D', false)).to.equal(1);
         expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', false)).to.equal(0);
       });
       it('should return the difference in days between two instances as float', function () {
@@ -414,8 +415,16 @@ describe('time', function () {
         expect(time.create('2016-01-01T01:00:00').diff(time.create('2016-01-01T00:59:30'), 'm', true)).to.equal(0.5);
       });
       it('should handle custom start values', function () {
-        expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', false, 6)).to.equal(1);
-        expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', true, 6)).to.equal(1);
+        time.init({ dayStartsAt: 6 });
+        expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', false)).to.equal(1);
+        expect(time.create('2016-01-01T07:00:00').diff(time.create('2016-01-01T05:00:00'), 'D', true)).to.equal(2 / 24);
+        expect(time.create('2016-01-01T00:00:00').diff(time.create('2016-01-01T00:00:00'), 'D', false)).to.equal(0);
+        expect(time.create('2016-01-01T23:00:00').diff(time.create('2016-01-01T12:00:00'), 'D', false)).to.equal(0);
+        expect(time.create('2016-01-01T05:59:00').diff(time.create('2015-12-31T12:00:00'), 'D', false)).to.equal(0);
+        expect(time.create('2016-01-01T06:01:00').diff(time.create('2016-01-01T05:59:00'), 'D', false)).to.equal(1);
+        expect(time.create('2016-01-02T06:00:00').diff(time.create('2016-01-01T06:00:00'), 'D', false)).to.equal(1);
+        expect(time.create('2016-01-04T05:59:00').diff(time.create('2016-01-01T06:01:00'), 'D', false)).to.equal(2);
+        time.init();
       });
     });
 
@@ -449,10 +458,15 @@ describe('time', function () {
         expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:00'), 's')).to.equal(true);
       });
       it('should handle custom start values', function () {
-        expect(time.create('2016-01-01T05:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D', 6)).to.equal(false);
-        expect(time.create('2016-01-01T06:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D', 6)).to.equal(true);
-        expect(time.create('2016-05-01T00:00:00').isSame(time.create('2016-07-00T00:00:00'), 'Y', 5)).to.equal(false);
-        expect(time.create('2016-06-01T00:00:00').isSame(time.create('2016-07-00T00:00:00'), 'Y', 5)).to.equal(true);
+        time.init({ dayStartsAt: 6 });
+        expect(time.create('2016-01-01T05:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D')).to.equal(false);
+        expect(time.create('2016-01-01T06:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-01T23:00:00').isSame(time.create('2016-01-01T12:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-01T01:00:00').isSame(time.create('2016-01-01T02:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-01T05:59:00').isSame(time.create('2015-12-31T12:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-01T05:59:00').isSame(time.create('2016-01-01T06:00:00'), 'D')).to.equal(false);
+        time.init();
       });
     });
 
@@ -539,7 +553,7 @@ describe('time', function () {
       it('should handle masks when missing locale', function () {
         expect(time.create('2016-01-01T00:00:00').format('MMM')).to.equal('[missing locale]');
       });
-      it.only('should handle relative day masks', function () {
+      it.skip('should handle relative day masks', function () {
         expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr', 0, 6, 18)).to.equal('Today');
         expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr')).to.equal('Fri');
         expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 0, 6, 18)).to.equal('Today');
@@ -612,50 +626,6 @@ describe('time', function () {
   describe('now()', function () {
     it('should return UTC epoch timestamp', function () {
       expect(+time.create() - time.now()).to.be.within(-20, 0);
-    });
-  });
-
-  describe.skip('sameInterval()', function () {
-    describe('DAILY', function () {
-      it('should return true for 2 identical days', function () {
-        expect(time.sameInterval(moment('2014-01-01T00:00:00'), moment('2014-01-01T00:00:00'), date.DAILY)).to.be.true;
-      });
-      it('should return true for 2 days falling between 6:00 and 24:00 the same day', function () {
-        expect(time.sameInterval(moment('2014-01-01T23:00:00'), moment('2014-01-01T12:00:00'), date.DAILY)).to.be.true;
-      });
-      it('should return true for 2 days falling between 0:00 and 6:00 the same day', function () {
-        expect(time.sameInterval(moment('2014-01-02T01:00:00'), moment('2014-01-02T02:00:00'), date.DAILY)).to.be.true;
-      });
-      it('should return true for 2 days falling between 6:00 and 5:59 the following day/month/year', function () {
-        expect(time.sameInterval(moment('2014-01-01T05:59:00'), moment('2013-12-31T12:00:00'), date.DAILY)).to.be.true;
-      });
-      it('should return false for 2 days falling on either side of 6:00', function () {
-        expect(time.sameInterval(moment('2014-01-01T05:59:00'), moment('2014-01-01T06:00:00'), date.DAILY)).to.not.be.true;
-      });
-    });
-  });
-
-  describe.skip('daysFrom()', function () {
-    it('should return 0 for 2 identical dates', function () {
-      expect(time.daysFrom(moment('2014-01-01T00:00:00'), moment('2014-01-01T00:00:00'))).to.eql(0);
-    });
-    it('should return 0 for 2 dates falling between 6:00 and 24:00 the same day', function () {
-      expect(time.daysFrom(moment('2014-01-01T23:00:00'), moment('2014-01-01T12:00:00'))).to.eql(0);
-    });
-    it('should return 0 for 2 dates falling between 0:00 and 6:00 the same day', function () {
-      expect(time.daysFrom(moment('2014-01-02T02:00:00'), moment('2014-01-02T01:00:00'))).to.eql(0);
-    });
-    it('should return 0 for 2 dates falling between 6:00 and 5:59 the following day/month/year', function () {
-      expect(time.daysFrom(moment('2014-01-01T05:59:00'), moment('2013-12-31T12:00:00'))).to.eql(0);
-    });
-    it('should return 1 for 2 dates falling on either side of 6:00', function () {
-      expect(time.daysFrom(moment('2014-01-01T06:01:00'), moment('2014-01-01T05:59:00'))).to.eql(1);
-    });
-    it('should return 1 for 2 dates falling at 6:00 one day apart', function () {
-      expect(time.daysFrom(moment('2014-01-02T06:00:00'), moment('2014-01-01T06:00:00'))).to.eql(1);
-    });
-    it('should return a value greater than 1 for 2 dates more than 1 day apart', function () {
-      expect(time.daysFrom(moment('2014-01-04T05:59:00'), moment('2014-01-01T06:01:00'))).to.eql(2);
     });
   });
 });
