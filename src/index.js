@@ -30,7 +30,7 @@ const isPlainObject = require('is-plain-obj')
     }
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
   , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/
-  , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g;
+  , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g;
 
 module.exports = {
   PARSE_KEYS: [
@@ -181,7 +181,7 @@ class Time {
       , t1 = this
       , t2 = time;
 
-    // Reset to start of if custom value (will result in whole delta)
+    // Reset to start if custom value (will result in whole delta)
     if (value != null) {
       t1 = t1.startOf(unit, value);
       t2 = t2.startOf(unit, value);
@@ -377,7 +377,7 @@ class Time {
   }
 
   /**
-   * Compare 'time' with 'unit' and determine is similar
+   * Compare 'time', limited by 'unit', and determine if is similar
    * @param {Time} time
    * @param {String} [unit]
    * @param {Number} [value]
@@ -431,7 +431,7 @@ class Time {
   }
 
   /**
-   * Compare 'time' with 'unit' and determine if is before
+   * Compare 'time', limited by 'unit', and determine if is before
    * @param {Time} time
    * @param {String} [unit]
    * @returns {Boolean}
@@ -487,9 +487,12 @@ class Time {
   /**
    * Format into string based on 'mask'
    * @param {String} mask
+   * @param {Number} [daysFromNow]
+   * @param {Number} [dayStart]
+   * @param {Number} [nightStart]
    * @returns {String}
    */
-  format (mask) {
+  format (mask, daysFromNow, dayStart, nightStart) {
     // Prevent regex denial of service
     if (!mask || mask.length > 100) return '';
 
@@ -515,8 +518,24 @@ class Time {
           return this.day();
         case 'dd':
           return pad(this.day());
+        case 'ddr':
+        case 'dddr':
+          if (daysFromNow != null && daysFromNow < 2) {
+            const hour = this.hour()
+              , relativeDay = (daysFromNow == 1)
+                  ? 'tomorrow'
+                  : (hour >= nightStart || hour < dayStart)
+                    ? 'tonight'
+                    : 'today';
+
+            console.log(hour, relativeDay)
+            return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
+          }
+          // Fall through if not relative
+        case 'ddr':
         case 'ddd':
           return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
+        case 'dddr':
         case 'dddd':
           return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
         case 'H':
@@ -567,6 +586,18 @@ class Time {
 
     d[method](value);
     return update(instance);
+  }
+
+  _getRelativeDay (daysFromNow, dayStart, nightStart) {
+    if (daysFromNow != null && daysFromNow < 2) {
+      const hour = this.hour();
+
+      return (daysFromNow == 1)
+        ? 'tomorrow'
+        : (hour >= nightStart || hour < dayStart)
+          ? 'tonight'
+          : 'today';
+    }
   }
 
   /**
@@ -791,25 +822,3 @@ function pad (value, length) {
 // exports.TZ_OFFSET = moment().utcOffset();
 // exports.WEEKLY = 'weekly';
 
-// /**
-//  * Retrieve long format day text from 'date'
-//  * @param {Moment} date
-//  * @param {Number} daysFromNow
-//  * @param {String} format
-//  * @param {Object} grammar
-//  * @returns {String}
-//  */
-// exports.formatDay = function (date, daysFromNow, format, grammar) {
-//   if (daysFromNow < 2) {
-//     const hour = date.hour();
-
-//     return ((daysFromNow == 1)
-//       ? grammar.tomorrow
-//       : (hour >= exports.DAY_END || hour < exports.DAY_START)
-//         ? grammar.tonight
-//         : grammar.today
-//     );
-//   }
-
-//   return date.format(format);
-// };

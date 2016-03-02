@@ -539,6 +539,12 @@ describe('time', function () {
       it('should handle masks when missing locale', function () {
         expect(time.create('2016-01-01T00:00:00').format('MMM')).to.equal('[missing locale]');
       });
+      it.only('should handle relative day masks', function () {
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr', 0, 6, 18)).to.equal('Today');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr')).to.equal('Fri');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 0, 6, 18)).to.equal('Today');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr')).to.equal('Friday');
+      });
     });
   });
 
