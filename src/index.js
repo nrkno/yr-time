@@ -7,7 +7,9 @@
  * @license MIT
  */
 
-const DEFAULT_DATE = 'Invalid Date'
+const isPlainObject = require('is-plain-obj')
+
+  , DEFAULT_DATE = 'Invalid Date'
   , DEFAULT_OFFSET = '+00:00'
   , FLAGS = {
       Y: 1,
@@ -28,18 +30,23 @@ const DEFAULT_DATE = 'Invalid Date'
     }
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
   , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/
-  , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g
-  , UNITS = [
-      'Y',
-      'M',
-      'D',
-      'H',
-      'm',
-      's',
-      'S'
-    ];
+  , RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g;
 
 module.exports = {
+  PARSE_KEYS: [
+    'created',
+    'end',
+    'from',
+    'middle',
+    'nominalStart',
+    'rise',
+    'set',
+    'start',
+    'times',
+    'to',
+    'update'
+  ],
+
   /**
    * Instance factory
    * @param {String} timeString
@@ -51,6 +58,40 @@ module.exports = {
 
   now () {
     return Date.now();
+  },
+
+  /**
+   * Parse time strings into Time instances
+   * @param {Object} obj
+   * @returns {Object}
+   */
+  parse (obj) {
+    const parseValue = (value) => {
+      if (Array.isArray(value)) {
+        return value.map((value) => {
+          return ('string' == typeof value) ? this.create(value) : traverse(value);
+        });
+      } else if ('string' == typeof value) {
+        return this.create(value);
+      }
+      return value;
+    };
+
+    const traverse = (o) => {
+      // Abort if not object or array
+      if (!(Array.isArray(o) || isPlainObject(o))) return o;
+
+      for (const prop in o) {
+        // Only parse whitelisted keys
+        o[prop] = (~this.PARSE_KEYS.indexOf(prop))
+          ? parseValue(o[prop])
+          : traverse(o[prop]);
+      }
+
+      return o;
+    };
+
+    return traverse(obj);
   }
 };
 
@@ -618,11 +659,33 @@ class Time {
   }
 
   /**
-   * Return stringified
+   * Convert to JSON format
    * @returns {String}
    */
   toJSON () {
     return this.timeString;
+  }
+
+  /**
+   * Retrieve numberified
+   * @returns {Number}
+   */
+  valueOf () {
+    if (!this.isValid) return NaN;
+
+    const d = this._date;
+    let num = 0;
+
+    if (this._offset != 0) {
+      // Reverse offset
+      d.setUTCMinutes(d.getUTCMinutes() - this._offset);
+      num = +d;
+      d.setUTCMinutes(d.getUTCMinutes() + this._offset);
+    } else {
+      num = +d;
+    }
+
+    return num;
   }
 }
 
@@ -718,26 +781,6 @@ function pad (value, length) {
   return value;
 }
 
-// const isPlainObject = require('is-plain-obj')
-//   , moment = require('moment')
-
-//   , PARSE_KEYS = [
-//       'created',
-//       'end',
-//       'from',
-//       'middle',
-//       'nominalStart',
-//       'rise',
-//       'set',
-//       'start',
-//       'times',
-//       'to',
-//       'update'
-//     ]
-
-//   , localNow = Date.now()
-//   , utcNow = moment.utc().valueOf();
-
 // exports.ANNUALLY = 'annually';
 // exports.DAILY = 'daily';
 // exports.DAY_END = 18;
@@ -772,46 +815,6 @@ function pad (value, length) {
 // };
 
 // /**
-//  * Parse date strings into moment instances
-//  * @param {Object} obj
-//  * @returns {Object}
-//  */
-// exports.parse = function (obj) {
-//   function isParseable (val) {
-//     const type = typeof val;
-
-//     return 'number' == type || 'string' == type;
-//   }
-
-//   function parse (val) {
-//     if (Array.isArray(val)) {
-//       return val.map((v) => {
-//         return isParseable(v) ? moment.parseZone(v) : traverse(v);
-//       });
-//     } else if (isParseable(val)) {
-//       return moment.parseZone(val);
-//     }
-//     return val;
-//   }
-
-//   function traverse (o) {
-//     // Abort if not object or array
-//     if (!(Array.isArray(o) || isPlainObject(o))) return o;
-
-//     for (const prop in o) {
-//       // Only parse whitelisted keys
-//       o[prop] = (~PARSE_KEYS.indexOf(prop))
-//         ? parse(o[prop])
-//         : traverse(o[prop]);
-//     }
-
-//     return o;
-//   }
-
-//   return traverse(obj);
-// };
-
-// /**
 //  * Get expiry as epoch timestamp
 //  * @param {Number} number
 //  * @param {String} key
@@ -820,22 +823,3 @@ function pad (value, length) {
 // exports.getExpires = function (number, key) {
 //   return moment.utc().add(number, key).valueOf();
 // };
-
-// /**
-//  * Adjust 'date' to whole day, taking into account daily offset start time
-//  * @param {Moment} date
-//  * @returns {Moment}
-//  */
-// function getDay (date) {
-//   var d = moment({
-//     y: date.year(),
-//     M: date.month(),
-//     d: date.date(),
-//     h: 0,
-//     m: 0
-//   });
-
-//   return (date.hour() < exports.DAY_START)
-//     ? d.subtract(1, 'day')
-//     : d;
-// }
