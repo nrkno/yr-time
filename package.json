@@ -26,12 +26,12 @@
     "build": {
       "targets": [
         {
-          "input": "src",
+          "input": "src/index.js",
           "output": ".",
           "modular": false
         },
         {
-          "input": "src/index.js",
+          "input": "test/src.js",
           "output": "test/lib.js",
           "boilerplate": true,
           "bootstrap": true
