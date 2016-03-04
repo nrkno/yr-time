@@ -9,6 +9,7 @@ try {
   expect = require('expect.js');
 // .. or browser
 } catch (err) {
+  // if (err) console.log(err);
   time = require('test/index.js').time;
   en = require('test/index.js').en;
   expect = window.expect;
@@ -25,6 +26,7 @@ describe('time', function () {
     });
     it('should default to now if no time string', function () {
       expect(time.create()._date).to.be.a(Date);
+      expect(time.create()._offset).to.equal((new Date()).getTimezoneOffset() * -1);
     });
     it('should handle incomplete time strings', function () {
       expect(time.create('2016')._date).to.be.a(Date);
@@ -76,6 +78,20 @@ describe('time', function () {
         expect(time.create('2015-12-31T23:59:59-01:00').toString()).to.equal('2015-12-31T23:59:59.000-01:00');
         expect(JSON.stringify({ time: time.create('2015-12-31T23:59:59-01:00') })).to.equal('{"time":"2015-12-31T23:59:59.000-01:00"}');
         expect(JSON.stringify({ time: time.create('2016-01-01T00:00:00+01:30') })).to.equal('{"time":"2016-01-01T00:00:00.000+01:30"}');
+      });
+    });
+
+    describe('valueOf()', function () {
+      it('should return milliseconds UTC', function () {
+        const t1 = time.create() // Local
+          , t2 = t1.subtract(t1._localOffset, 'm') // Local to UTCish
+          , t3 = time.create((new Date()).toISOString()) // UTC
+          , tzDiff = Math.abs(t1._localOffset) * 6e4;
+
+        expect(+t1 - +t2).to.be.within(36e5 - 20, 36e5 + 20);
+        expect(+t1 - +t3).to.be.within(tzDiff - 20, tzDiff + 20);
+        expect(+t2 - +t3).to.be.within(-20, 20);
+        expect(+t3 - Date.now()).to.be.within(-20, 20);
       });
     });
 
@@ -629,7 +645,9 @@ describe('time', function () {
 
   describe('now()', function () {
     it('should return UTC epoch timestamp', function () {
-      expect(+time.create() - time.now()).to.be.within(-20, 0);
+      const tzDiff = Math.abs((new Date()).getTimezoneOffset()) * 6e4;
+
+      expect(+time.create() - time.now()).to.be.within(tzDiff - 20, tzDiff + 20);
     });
   });
 });

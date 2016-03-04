@@ -116,12 +116,20 @@ class Time {
   constructor (timeString) {
     this._date = DEFAULT_DATE;
     this._locale = null;
+    this._localOffset = 0;
     this._offset = 0;
     this._offsetString = DEFAULT_OFFSET;
     this.isValid = false;
     this.timeString = DEFAULT_DATE;
 
-    if (timeString == null) timeString = new Date().toISOString();
+    // Local "now"
+    if (timeString == null) {
+      const d = new Date()
+        , tz = -1 * d.getTimezoneOffset();
+
+      d.setUTCMinutes(d.getUTCMinutes() + tz);
+      timeString = d.toISOString().replace('Z', minutesToOffsetString(tz));
+    }
     // Prevent regex denial of service
     if (timeString.length > 30) return;
 
@@ -149,6 +157,7 @@ class Time {
     }
 
     this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
+    this._localOffset = -1 * this._date.getTimezoneOffset();
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
   }
@@ -567,7 +576,7 @@ class Time {
   }
 
   /**
-   * Retrieve relative day type based on number of days from now
+   * Retrieve relative day type based on number of days from "now"
    * @param {Number} daysFromNow
    * @returns {String}
    */
@@ -682,23 +691,17 @@ class Time {
   }
 
   /**
-   * Retrieve numberified
+   * Retrieve number of milliseconds UTC
    * @returns {Number}
    */
   valueOf () {
     if (!this.isValid) return NaN;
 
     const d = this._date;
-    let num = 0;
+    let num = +d;
 
-    if (this._offset != 0) {
-      // Reverse offset
-      d.setUTCMinutes(d.getUTCMinutes() - this._offset);
-      num = +d;
-      d.setUTCMinutes(d.getUTCMinutes() + this._offset);
-    } else {
-      num = +d;
-    }
+    // Reverse offset
+    if (this._offset != 0) num -= this._offset * 6e4;
 
     return num;
   }
@@ -794,4 +797,18 @@ function pad (value, length) {
   }
 
   return value;
+}
+
+/**
+ * Convert 'minutes' to offset string
+ * @param {Number} minutes
+ * @returns {String}
+ */
+function minutesToOffsetString (minutes) {
+  const t = String(Math.abs(minutes / 60)).split('.')
+    , H = pad(t[0])
+    , m = t[1] ? (parseInt(t[1], 10) * 0.6) : 0
+    , sign = minutes < 0 ? '-' : '+';
+
+  return `${sign}${H}:${pad(m)}`;
 }
