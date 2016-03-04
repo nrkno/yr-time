@@ -1007,7 +1007,7 @@ require.register('src/index.js', function(require, module, exports) {
       return value;
     }
 });
-require.register('test/index.js', function(require, module, exports) {
+require.register('test/src.js', function(require, module, exports) {
     'use strict';
     
     module.exports = {
@@ -1066,4 +1066,4 @@ require.register('test/index.js', function(require, module, exports) {
     };
 });
 
-require('test/index.js');
+require('test/src.js');

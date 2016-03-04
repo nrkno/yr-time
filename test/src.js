@@ -1,6 +1,6 @@
 'use strict';
 
 module.exports = {
-  en: require('../src/locale/en.json'),
+  en: require('../locale/en.json'),
   time: require('../src/index')
 };
