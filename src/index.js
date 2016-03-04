@@ -17,8 +17,6 @@ const isPlainObject = require('is-plain-obj')
       'created',
       'end',
       'from',
-      'middle',
-      'nominalStart',
       'rise',
       'set',
       'start',
