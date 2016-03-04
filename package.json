@@ -7,8 +7,8 @@
     "is-plain-obj": "1.1.x"
   },
   "devDependencies": {
-    "buddy": "*",
-    "buddy-plugin-babel": "6.5.2-2",
+    "buddy": "4.x.x",
+    "buddy-plugin-babel": "6.x.x",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*"
