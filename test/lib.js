@@ -219,7 +219,9 @@ require.register('src/index.js', function(require, module, exports) {
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
     ,
         RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/,
-        RE_TOKEN = /(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g;
+        RE_TOKEN = /(LTS?)|(L{1,4})|(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g,
+        RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g,
+        RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
     var dayStartsAt = DEFAULT_DAY_STARTS_AT,
         nightStartsAt = DEFAULT_NIGHT_STARTS_AT,
         parseKeys = DEFAULT_PARSE_KEYS;
@@ -346,7 +348,6 @@ require.register('src/index.js', function(require, module, exports) {
         this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
         this.isValid = isValid(this._date);
         this.timeString = this.toString();
-        console.log(this);
       }
     
       /**
@@ -697,8 +698,24 @@ require.register('src/index.js', function(require, module, exports) {
     
         var relativeDay = daysFromNow != null ? this._getRelativeDay(daysFromNow) : '';
     
-        return mask.replace(RE_TOKEN, function (match) {
+        var escaped = [],
+            idx = 0;
+    
+        // Remove all escaped text (in [xxx])
+        mask = mask.replace(RE_TOKEN_ESCAPE, function (match) {
+          escaped.push(match.slice(1, -1));
+          return '$' + idx++;
+        });
+    
+        mask = mask.replace(RE_TOKEN, function (match) {
           switch (match) {
+            case 'LT':
+            case 'LTS':
+            case 'L':
+            case 'LL':
+            case 'LLL':
+            case 'LLLL':
+              return _this._locale && _this._locale.format && _this._locale.format[match] ? _this.format(_this._locale.format[match], daysFromNow) : '[missing locale]';
             case 'YY':
               return String(_this.year()).slice(-2);
             case 'YYYY':
@@ -751,6 +768,15 @@ require.register('src/index.js', function(require, module, exports) {
               return '';
           }
         });
+    
+        // Replace all escaped text
+        if (escaped.length) {
+          mask = mask.replace(RE_TOKEN_ESCAPED, function (match) {
+            return escaped[match.slice(1)];
+          });
+        }
+    
+        return mask;
       };
     
       /**
@@ -1035,6 +1061,14 @@ require.register('test/src.js', function(require, module, exports) {
     "Friday",
     "Saturday"
   ],
+  "format": {
+    "LT" : "HH:mm",
+    "LTS" : "HH:mm:ss",
+    "L" : "DD/MM/YYYY",
+    "LL" : "D MMMM YYYY",
+    "LLL" : "D MMMM YYYY HH:mm",
+    "LLLL" : "dddd, D MMMM YYYY HH:mm"
+  },
   "monthsShort": [
     "Jan",
     "Feb",
@@ -1066,6 +1100,65 @@ require.register('test/src.js', function(require, module, exports) {
   "today": "Today",
   "tomorrow": "Tomorrow",
   "tonight": "Tonight"
+},
+      nb: {
+  "daysShort": [
+    "sø.",
+    "ma.",
+    "ti.",
+    "on.",
+    "to.",
+    "fr.",
+    "lø."
+  ],
+  "days": [
+    "søndag",
+    "mandag",
+    "tirsdag",
+    "onsdag",
+    "torsdag",
+    "fredag",
+    "lørdag"
+  ],
+  "format": {
+    "LT" : "HH:mm",
+    "LTS" : "HH:mm:ss",
+    "L" : "DD.MM.YYYY",
+    "LL" : "D. MMMM YYYY",
+    "LLL" : "D. MMMM YYYY [kl.] HH:mm",
+    "LLLL" : "dddd D. MMMM YYYY [kl.] HH:mm"
+  },
+  "monthsShort": [
+    "jan.",
+    "feb.",
+    "mars",
+    "apr.",
+    "mai",
+    "juni",
+    "juli",
+    "aug.",
+    "sep.",
+    "okt.",
+    "nov.",
+    "des."
+  ],
+  "months": [
+    "januar",
+    "februar",
+    "mars",
+    "april",
+    "mai",
+    "juni",
+    "juli",
+    "august",
+    "september",
+    "oktober",
+    "november",
+    "desember"
+  ],
+  "today": "i dag",
+  "tomorrow": "i morgen",
+  "tonight": "i natt"
 },
       time: require('src/index.js')
     };

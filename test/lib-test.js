@@ -1,18 +1,20 @@
 'use strict';
 
-var time, en, expect;
+var en, expect, nb, time;
 
 // Make it work in node..
 try {
-  time = require('../src/index');
   en = require('../locale/en');
   expect = require('expect.js');
+  nb = require('../locale/nb');
+  time = require('../src/index');
 // .. or browser
 } catch (err) {
   // if (err) console.log(err);
-  time = require('test/index.js').time;
   en = require('test/index.js').en;
   expect = window.expect;
+  nb = require('test/index.js').nb;
+  time = require('test/index.js').time;
 }
 
 describe('time', function () {
@@ -572,6 +574,9 @@ describe('time', function () {
       it('should handle masks when missing locale', function () {
         expect(time.create('2016-01-01T00:00:00').format('MMM')).to.equal('[missing locale]');
       });
+      it('should ignore escaped content', function () {
+        expect(time.create('2016-01-01T07:00:00').format('[Do not] D [Man]')).to.equal('Do not 1 Man');
+      });
       it('should handle relative day masks', function () {
         time.init({ dayStartsAt: 6 });
         expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr', 0)).to.equal('Today');
@@ -581,6 +586,22 @@ describe('time', function () {
         expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 1)).to.equal('Tomorrow');
         expect(time.create('2016-01-01T19:00:00').locale(en).format('dddr', 0)).to.equal('Tonight');
         time.init();
+      });
+      it('should handle localized format masks for "en"', function () {
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('LT', 0)).to.equal('07:00');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('LTS', 0)).to.equal('07:00:00');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('L', 0)).to.equal('01/01/2016');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('LL', 0)).to.equal('1 January 2016');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('LLL', 0)).to.equal('1 January 2016 07:00');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('LLLL', 0)).to.equal('Friday, 1 January 2016 07:00');
+      });
+      it('should handle localized format masks for "nb"', function () {
+        expect(time.create('2016-01-01T07:00:00').locale(nb).format('LT', 0)).to.equal('07:00');
+        expect(time.create('2016-01-01T07:00:00').locale(nb).format('LTS', 0)).to.equal('07:00:00');
+        expect(time.create('2016-01-01T07:00:00').locale(nb).format('L', 0)).to.equal('01.01.2016');
+        expect(time.create('2016-01-01T07:00:00').locale(nb).format('LL', 0)).to.equal('1. januar 2016');
+        expect(time.create('2016-01-01T07:00:00').locale(nb).format('LLL', 0)).to.equal('1. januar 2016 kl. 07:00');
+        expect(time.create('2016-01-01T07:00:00').locale(nb).format('LLLL', 0)).to.equal('fredag 1. januar 2016 kl. 07:00');
       });
     });
   });
