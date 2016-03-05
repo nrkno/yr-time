@@ -11,10 +11,10 @@ try {
 // .. or browser
 } catch (err) {
   // if (err) console.log(err);
-  en = require('test/index.js').en;
+  en = require('test/src.js').en;
   expect = window.expect;
-  nb = require('test/index.js').nb;
-  time = require('test/index.js').time;
+  nb = require('test/src.js').nb;
+  time = require('test/src.js').time;
 }
 
 describe('time', function () {
