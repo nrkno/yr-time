@@ -51,9 +51,9 @@ describe('time', function () {
     });
     it('should set TZ offset if specified', function () {
       expect(time.create('2016-01-01T00:00:00+01:00')._offset).to.equal(60);
-      expect(time.create('2016-01-01T00:00:00+01:00')._date.toISOString()).to.equal('2016-01-01T01:00:00.000Z');
+      expect(time.create('2016-01-01T00:00:00+01:00').timeString).to.equal('2016-01-01T00:00:00.000+01:00');
       expect(time.create('2016-01-01T00:00:00-01:30')._offset).to.equal(-90);
-      expect(time.create('2016-01-01T00:00:00-01:30')._date.toISOString()).to.equal('2015-12-31T22:30:00.000Z');
+      expect(time.create('2016-01-01T00:00:00-01:30').timeString).to.equal('2016-01-01T00:00:00.000-01:30');
     });
   });
 
@@ -83,7 +83,7 @@ describe('time', function () {
 
     describe('valueOf()', function () {
       it('should return milliseconds UTC', function () {
-        const tz = (new Date()).getTimezoneOffset() * -1
+        var tz = (new Date()).getTimezoneOffset() * -1
           , t1 = time.create() // Local
           , t2 = t1.subtract(tz, 'm') // Local to UTCish
           , t3 = time.create((new Date()).toISOString()) // UTC
@@ -103,9 +103,9 @@ describe('time', function () {
           expect(time.create('1916-01-01T00:00:00').year()).to.equal(1916);
         });
         it('should return full year, accounting for TZ offset', function () {
-          expect(time.create('2016-01-01T00:00:00-01:30').year()).to.equal(2015);
-          expect(time.create('2016-01-01T00:00:00-00:30').year()).to.equal(2015);
-          expect(time.create('2015-12-31T23:00:00+01:00').year()).to.equal(2016);
+          expect(time.create('2016-01-01T00:00:00-01:30').year()).to.equal(2016);
+          expect(time.create('2016-01-01T00:00:00-00:30').year()).to.equal(2016);
+          expect(time.create('2015-12-31T23:00:00+01:00').year()).to.equal(2015);
         });
       });
       describe('month()', function () {
@@ -114,8 +114,8 @@ describe('time', function () {
           expect(time.create('2015-12-01T00:00:00').month()).to.equal(11);
         });
         it('should return month, accounting for TZ offset', function () {
-          expect(time.create('2016-01-01T00:00:00-01:30').month()).to.equal(11);
-          expect(time.create('2015-12-31T23:00:00+01:00').month()).to.equal(0);
+          expect(time.create('2016-01-01T00:00:00-01:30').month()).to.equal(0);
+          expect(time.create('2015-12-31T23:00:00+01:00').month()).to.equal(11);
         });
       });
       describe('date()', function () {
@@ -124,8 +124,8 @@ describe('time', function () {
           expect(time.create('2015-12-31T00:00:00').date()).to.equal(31);
         });
         it('should return date, accounting for TZ offset', function () {
-          expect(time.create('2016-01-01T00:00:00-01:30').date()).to.equal(31);
-          expect(time.create('2015-12-31T23:00:00+01:00').date()).to.equal(1);
+          expect(time.create('2016-01-01T00:00:00-01:30').date()).to.equal(1);
+          expect(time.create('2015-12-31T23:00:00+01:00').date()).to.equal(31);
         });
       });
       describe('day()', function () {
@@ -134,8 +134,8 @@ describe('time', function () {
           expect(time.create('2015-12-31T00:00:00').day()).to.equal(4);
         });
         it('should return day, accounting for TZ offset', function () {
-          expect(time.create('2016-01-01T00:00:00-01:30').day()).to.equal(4);
-          expect(time.create('2015-12-31T23:00:00+01:00').day()).to.equal(5);
+          expect(time.create('2016-01-01T00:00:00-01:30').day()).to.equal(5);
+          expect(time.create('2015-12-31T23:00:00+01:00').day()).to.equal(4);
         });
       });
       describe('hour()', function () {
@@ -144,8 +144,8 @@ describe('time', function () {
           expect(time.create('2015-12-31T23:00:00').hour()).to.equal(23);
         });
         it('should return hour, accounting for TZ offset', function () {
-          expect(time.create('2016-01-01T00:00:00-01:30').hour()).to.equal(22);
-          expect(time.create('2015-12-31T23:00:00+01:00').hour()).to.equal(0);
+          expect(time.create('2016-01-01T00:00:00-01:30').hour()).to.equal(0);
+          expect(time.create('2015-12-31T23:00:00+01:00').hour()).to.equal(23);
         });
       });
       describe('minute()', function () {
@@ -154,8 +154,8 @@ describe('time', function () {
           expect(time.create('2015-12-31T23:15:00').minute()).to.equal(15);
         });
         it('should return minute, accounting for TZ offset', function () {
-          expect(time.create('2016-01-01T00:00:00-01:30').minute()).to.equal(30);
-          expect(time.create('2015-12-31T23:15:00+01:15').minute()).to.equal(30);
+          expect(time.create('2016-01-01T00:00:00-01:30').minute()).to.equal(0);
+          expect(time.create('2015-12-31T23:15:00+01:15').minute()).to.equal(15);
         });
       });
     });
@@ -254,6 +254,7 @@ describe('time', function () {
 
           expect(t2).to.not.equal(t1);
           expect(t2.year()).to.equal(2016);
+          expect(t2.timeString).to.equal('2016-12-31T23:15:00.000+00:00')
         });
         it('should return a new instance with added months', function () {
           var t1 = time.create('2015-12-31T23:15:00')
@@ -261,6 +262,7 @@ describe('time', function () {
 
           expect(t2).to.not.equal(t1);
           expect(t2.month()).to.equal(0);
+          expect(t2.timeString).to.equal('2016-01-31T23:15:00.000+00:00')
           expect(t2.add(14, 'M').year()).to.equal(2017);
         });
         it('should return a new instance with added days', function () {
@@ -353,27 +355,27 @@ describe('time', function () {
 
       describe('startOf()', function () {
         it('should set time to start of year', function () {
-          expect(time.create('2015-12-31T23:59:59').startOf('Y')._date.toISOString()).to.equal('2015-01-01T00:00:00.000Z');
+          expect(time.create('2015-12-31T23:59:59').startOf('Y').timeString).to.equal('2015-01-01T00:00:00.000+00:00');
         });
         it('should set time to start of month', function () {
-          expect(time.create('2015-12-31T23:59:59').startOf('M')._date.toISOString()).to.equal('2015-12-01T00:00:00.000Z');
+          expect(time.create('2015-12-31T23:59:59').startOf('M').timeString).to.equal('2015-12-01T00:00:00.000+00:00');
         });
         it('should set time to start of day', function () {
-          expect(time.create('2015-12-31T23:59:59').startOf('D')._date.toISOString()).to.equal('2015-12-31T00:00:00.000Z');
+          expect(time.create('2015-12-31T23:59:59').startOf('D').timeString).to.equal('2015-12-31T00:00:00.000+00:00');
         });
         it('should set time to start of hour', function () {
-          expect(time.create('2015-12-31T23:59:59').startOf('H')._date.toISOString()).to.equal('2015-12-31T23:00:00.000Z');
+          expect(time.create('2015-12-31T23:59:59').startOf('H').timeString).to.equal('2015-12-31T23:00:00.000+00:00');
         });
         it('should set time to start of minute', function () {
-          expect(time.create('2015-12-31T23:59:59').startOf('m')._date.toISOString()).to.equal('2015-12-31T23:59:00.000Z');
+          expect(time.create('2015-12-31T23:59:59').startOf('m').timeString).to.equal('2015-12-31T23:59:00.000+00:00');
         });
         it('should set time to start of second', function () {
-          expect(time.create('2015-12-31T23:59:59').startOf('s')._date.toISOString()).to.equal('2015-12-31T23:59:59.000Z');
+          expect(time.create('2015-12-31T23:59:59').startOf('s').timeString).to.equal('2015-12-31T23:59:59.000+00:00');
         });
         it('should set time to custom day start value', function () {
           time.init({ dayStartsAt: 6 });
-          expect(time.create('2015-12-31T23:59:59').startOf('D')._date.toISOString()).to.equal('2015-12-31T06:00:00.000Z');
-          expect(time.create('2015-12-31T00:00:00').startOf('D')._date.toISOString()).to.equal('2015-12-30T06:00:00.000Z');
+          expect(time.create('2015-12-31T23:59:59').startOf('D').timeString).to.equal('2015-12-31T06:00:00.000+00:00');
+          expect(time.create('2015-12-31T00:00:00').startOf('D').timeString).to.equal('2015-12-30T06:00:00.000+00:00');
           time.init();
         });
       });
@@ -465,16 +467,7 @@ describe('time', function () {
       it('should return "true" for same day', function () {
         expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T01:00:00'), 'D')).to.equal(true);
       });
-      it('should return "true" for same hour', function () {
-        expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:59:00'), 'H')).to.equal(true);
-      });
-      it('should return "true" for same minute', function () {
-        expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:59'), 'm')).to.equal(true);
-      });
-      it('should return "true" for same second', function () {
-        expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:00'), 's')).to.equal(true);
-      });
-      it('should handle custom start values', function () {
+      it('should handle custom day start values', function () {
         time.init({ dayStartsAt: 6 });
         expect(time.create('2016-01-01T05:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D')).to.equal(false);
         expect(time.create('2016-01-01T06:00:00').isSame(time.create('2016-01-01T07:00:00'), 'D')).to.equal(true);
@@ -484,6 +477,15 @@ describe('time', function () {
         expect(time.create('2016-01-01T05:59:00').isSame(time.create('2015-12-31T12:00:00'), 'D')).to.equal(true);
         expect(time.create('2016-01-01T05:59:00').isSame(time.create('2016-01-01T06:00:00'), 'D')).to.equal(false);
         time.init();
+      });
+      it('should return "true" for same hour', function () {
+        expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:59:00'), 'H')).to.equal(true);
+      });
+      it('should return "true" for same minute', function () {
+        expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:59'), 'm')).to.equal(true);
+      });
+      it('should return "true" for same second', function () {
+        expect(time.create('2016-01-01T00:00:00').isSame(time.create('2016-01-01T00:00:00'), 's')).to.equal(true);
       });
     });
 
@@ -529,38 +531,38 @@ describe('time', function () {
       it('should handle year masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('YY')).to.equal('16');
         expect(time.create('2016-01-01T00:00:00').format('YYYY')).to.equal('2016');
-        expect(time.create('2016-01-01T00:00:00-01:00').format('YYYY')).to.equal('2015');
+        expect(time.create('2016-01-01T00:00:00-01:00').format('YYYY')).to.equal('2016');
       });
       it('should handle month masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('M')).to.equal('1');
         expect(time.create('2016-01-01T00:00:00').format('MM')).to.equal('01');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('MMM')).to.equal('Jan');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('MMMM')).to.equal('January');
-        expect(time.create('2016-01-01T00:00:00-01:00').locale(en).format('MMMM')).to.equal('December');
+        expect(time.create('2016-01-01T00:00:00-01:00').locale(en).format('MMMM')).to.equal('January');
       });
       it('should handle day of month masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('D')).to.equal('1');
         expect(time.create('2016-01-01T00:00:00').format('DD')).to.equal('01');
-        expect(time.create('2016-01-01T00:00:00-01:00').format('DD')).to.equal('31');
+        expect(time.create('2016-01-01T00:00:00-01:00').format('DD')).to.equal('01');
       });
       it('should handle day of week masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('d')).to.equal('5');
         expect(time.create('2016-01-01T00:00:00').format('dd')).to.equal('05');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('ddd')).to.equal('Fri');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('dddd')).to.equal('Friday');
-        expect(time.create('2016-01-01T00:00:00-01:00').locale(en).format('dddd')).to.equal('Thursday');
+        expect(time.create('2016-01-01T00:00:00-01:00').locale(en).format('dddd')).to.equal('Friday');
       });
       it('should handle hour masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('H')).to.equal('0');
         expect(time.create('2016-01-01T00:00:00').format('HH')).to.equal('00');
         expect(time.create('2015-12-31T23:00:00').format('HH')).to.equal('23');
-        expect(time.create('2016-01-01T00:00:00-01:00').format('HH')).to.equal('23');
+        expect(time.create('2016-01-01T00:00:00-01:00').format('HH')).to.equal('00');
       });
       it('should handle minute masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('m')).to.equal('0');
         expect(time.create('2016-01-01T00:00:00').format('mm')).to.equal('00');
         expect(time.create('2016-01-01T00:15:00').format('mm')).to.equal('15');
-        expect(time.create('2016-01-01T00:00:00+00:15').format('mm')).to.equal('15');
+        expect(time.create('2016-01-01T00:00:00+00:15').format('mm')).to.equal('00');
       });
       it('should handle second masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('s')).to.equal('0');
@@ -646,7 +648,7 @@ describe('time', function () {
 
   describe('now()', function () {
     it('should return UTC epoch timestamp', function () {
-      const tzDiff = Math.abs((new Date()).getTimezoneOffset()) * 6e4;
+      var tzDiff = Math.abs((new Date()).getTimezoneOffset()) * 6e4;
 
       expect(+time.create() - time.now()).to.be.within(tzDiff - 20, tzDiff + 20);
     });

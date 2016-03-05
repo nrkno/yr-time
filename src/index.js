@@ -133,10 +133,10 @@ class Time {
     // Local "now"
     if (timeString == null) {
       const d = new Date()
-        , tz = -1 * d.getTimezoneOffset();
+        , offset = -1 * d.getTimezoneOffset();
 
-      d.setUTCMinutes(d.getUTCMinutes() + tz);
-      timeString = d.toISOString().replace('Z', minutesToOffsetString(tz));
+      d.setUTCMinutes(d.getUTCMinutes() + offset);
+      timeString = d.toISOString().replace('Z', minutesToOffsetString(offset));
     }
     // Prevent regex denial of service
     if (timeString.length > 30) return;
@@ -148,22 +148,21 @@ class Time {
     const year = +match[1]
       , month = +match[2] || 1
       , day = +match[3] || 1
+      , hour = +match[4] || 0
+      , minute = +match[5] || 0
       , second = +match[6] || 0
       , millisecond = +match[7] || 0
       , offset = match[8] || '';
-    let hour = +match[4] || 0
-      , minute = +match[5] || 0;
 
     // Handle TZ offset
     if (offset && offset != DEFAULT_OFFSET) {
       const dir = (match[9] == '+') ? 1 : -1;
 
-      hour += dir * +match[10];
-      minute += dir * +match[11];
       this._offset = dir * ((+match[10] * 60) + +match[11]);
       this._offsetString = offset;
     }
 
+    // Create UTC date at local time
     this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
@@ -673,20 +672,7 @@ class Time {
    */
   toString () {
     if (!this.isValid) return 'Invalid Date';
-
-    const d = this._date;
-    let str = '';
-
-    if (this._offset != 0) {
-      // Reverse offset
-      d.setUTCMinutes(d.getUTCMinutes() - this._offset);
-      str = d.toISOString();
-      d.setUTCMinutes(d.getUTCMinutes() + this._offset);
-    } else {
-      str = d.toISOString();
-    }
-
-    return str.replace('Z', this._offsetString);
+    return this._date.toISOString().replace('Z', this._offsetString);
   }
 
   /**
@@ -703,14 +689,7 @@ class Time {
    */
   valueOf () {
     if (!this.isValid) return NaN;
-
-    const d = this._date;
-    let num = +d;
-
-    // Reverse offset
-    if (this._offset != 0) num -= this._offset * 6e4;
-
-    return num;
+    return +this._date;
   }
 }
 
