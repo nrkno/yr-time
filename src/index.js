@@ -125,7 +125,6 @@ class Time {
   constructor (timeString) {
     this._date = DEFAULT_DATE;
     this._locale = null;
-    this._localOffset = 0;
     this._offset = 0;
     this._offsetString = DEFAULT_OFFSET;
     this.isValid = false;
@@ -166,7 +165,6 @@ class Time {
     }
 
     this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
-    this._localOffset = -1 * this._date.getTimezoneOffset();
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
   }

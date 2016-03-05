@@ -83,10 +83,11 @@ describe('time', function () {
 
     describe('valueOf()', function () {
       it('should return milliseconds UTC', function () {
-        const t1 = time.create() // Local
-          , t2 = t1.subtract(t1._localOffset, 'm') // Local to UTCish
+        const tz = (new Date()).getTimezoneOffset() * -1
+          , t1 = time.create() // Local
+          , t2 = t1.subtract(tz, 'm') // Local to UTCish
           , t3 = time.create((new Date()).toISOString()) // UTC
-          , tzDiff = Math.abs(t1._localOffset) * 6e4;
+          , tzDiff = Math.abs(tz) * 6e4;
 
         expect(+t1 - +t2).to.be.within(36e5 - 20, 36e5 + 20);
         expect(+t1 - +t3).to.be.within(tzDiff - 20, tzDiff + 20);
