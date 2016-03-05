@@ -494,8 +494,9 @@ class Time {
    * @returns {String}
    */
   format (mask, daysFromNow) {
+    if (!mask) return this.timeString;
     // Prevent regex denial of service
-    if (!mask || mask.length > 100) return '';
+    if (mask.length > 100) return '';
 
     const relativeDay = (daysFromNow != null)
       ? this._getRelativeDay(daysFromNow)
