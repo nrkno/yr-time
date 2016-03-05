@@ -32,7 +32,9 @@ describe('time', function () {
     });
     it('should handle incomplete time strings', function () {
       expect(time.create('2016')._date).to.be.a(Date);
+      expect(time.create('2016+00:00')._date).to.be.a(Date);
       expect(time.create('2016-1')._date).to.be.a(Date);
+      expect(time.create('2016-1+00:00')._date).to.be.a(Date);
       expect(time.create('2016-01-1')._date).to.be.a(Date);
       expect(time.create('2016-01-01T')._date).to.be.a(Date);
       expect(time.create('2016-01-01T00:')._date).to.be.a(Date);
@@ -49,7 +51,7 @@ describe('time', function () {
     });
     it('should set default TZ offset if none specified', function () {
       expect(time.create('2016-01-01T00:00:00')._offset).to.equal(0);
-      expect(time.create('2016-01-01T00:00:00')._date.toISOString()).to.equal('2016-01-01T00:00:00.000Z');
+      expect(time.create('2016-01-01T00:00:00').timeString).to.equal('2016-01-01T00:00:00.000+00:00');
     });
     it('should set TZ offset if specified', function () {
       expect(time.create('2016-01-01T00:00:00+01:00')._offset).to.equal(60);
@@ -549,7 +551,6 @@ describe('time', function () {
       });
       it('should handle day of week masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('d')).to.equal('5');
-        expect(time.create('2016-01-01T00:00:00').format('dd')).to.equal('05');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('ddd')).to.equal('Fri');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('dddd')).to.equal('Friday');
         expect(time.create('2016-01-01T00:00:00-01:00').locale(en).format('dddd')).to.equal('Friday');
@@ -570,6 +571,14 @@ describe('time', function () {
         expect(time.create('2016-01-01T00:00:00').format('s')).to.equal('0');
         expect(time.create('2016-01-01T00:00:00').format('ss')).to.equal('00');
         expect(time.create('2016-01-01T00:00:15').format('ss')).to.equal('15');
+      });
+      it('should handle fractional second masks', function () {
+        expect(time.create('2016-01-01T00:00:00.555').format('S')).to.equal('5');
+        expect(time.create('2016-01-01T00:00:00.300').format('SS')).to.equal('30');
+        expect(time.create('2016-01-01T00:00:00.900').format('SSS')).to.equal('900');
+      });
+      it('should handle timezone masks', function () {
+        expect(time.create('2016-01-01T00:00:00+02:00').format('ZZ')).to.equal('+02:00');
       });
       it('should handle masks when missing locale', function () {
         expect(time.create('2016-01-01T00:00:00').format('MMM')).to.equal('[missing locale]');

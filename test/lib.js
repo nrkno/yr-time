@@ -219,7 +219,7 @@ require.register('src/index.js', function(require, module, exports) {
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
     ,
         RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/,
-        RE_TOKEN = /(LTS?)|(L{1,4})|(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g,
+        RE_TOKEN = /(LTS?)|(L{1,4})|(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})|(ZZ)/g,
         RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g,
         RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
     var dayStartsAt = DEFAULT_DAY_STARTS_AT,
@@ -693,8 +693,9 @@ require.register('src/index.js', function(require, module, exports) {
       Time.prototype.format = function format(mask, daysFromNow) {
         var _this = this;
     
+        if (!mask) return this.timeString;
         // Prevent regex denial of service
-        if (!mask || mask.length > 100) return '';
+        if (mask.length > 100) return '';
     
         var relativeDay = daysFromNow != null ? this._getRelativeDay(daysFromNow) : '';
     
@@ -740,8 +741,6 @@ require.register('src/index.js', function(require, module, exports) {
               return _this._locale && _this._locale.days ? _this._locale.days[_this.day()] : '[missing locale]';
             case 'd':
               return _this.day();
-            case 'dd':
-              return pad(_this.day());
             case 'ddd':
               return _this._locale && _this._locale.daysShort ? _this._locale.daysShort[_this.day()] : '[missing locale]';
             case 'dddd':
@@ -759,11 +758,13 @@ require.register('src/index.js', function(require, module, exports) {
             case 'ss':
               return pad(_this.second());
             case 'S':
-              return _this.millisecond();
+              return Math.floor(_this.millisecond() / 100);
             case 'SS':
-              return pad(_this.millisecond());
+              return Math.floor(_this.millisecond() / 10);
             case 'SSS':
-              return pad(_this.millisecond(), 3);
+              return _this.millisecond();
+            case 'ZZ':
+              return _this._offsetString;
             default:
               return '';
           }

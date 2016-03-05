@@ -43,7 +43,7 @@ const isPlainObject = require('is-plain-obj')
     }
     // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
   , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/
-  , RE_TOKEN = /(LTS?)|(L{1,4})|(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})/g
+  , RE_TOKEN = /(LTS?)|(L{1,4})|(Y{4}|Y{2})|(M{1,4})|(D{1,2})|(d{3}r|d{2}r)|(d{1,4})|(H{1,2})|(m{1,2})|(s{1,2})|(S{1,3})|(ZZ)/g
   , RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g
   , RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT
@@ -544,8 +544,6 @@ class Time {
           return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
         case 'd':
           return this.day();
-        case 'dd':
-          return pad(this.day());
         case 'ddd':
           return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
         case 'dddd':
@@ -563,11 +561,13 @@ class Time {
         case 'ss':
           return pad(this.second());
         case 'S':
-          return this.millisecond();
+          return Math.floor(this.millisecond() / 100);
         case 'SS':
-          return pad(this.millisecond());
+          return Math.floor(this.millisecond() / 10);
         case 'SSS':
-          return pad(this.millisecond(), 3);
+          return this.millisecond();
+        case 'ZZ':
+          return this._offsetString;
         default:
           return '';
       }
