@@ -650,4 +650,16 @@ describe('time', function () {
       expect(+time.create() - time.now()).to.be.within(tzDiff - 20, tzDiff + 20);
     });
   });
+
+  describe('isTime()', function () {
+    it('should return "true" for Time instances', function () {
+      expect(time.isTime(time.create())).to.equal(true);
+    });
+    it('should return "false" for non-Time instances', function () {
+      expect(time.isTime(null)).to.equal(false);
+      expect(time.isTime(false)).to.equal(false);
+      expect(time.isTime('')).to.equal(false);
+      expect(time.isTime({})).to.equal(false);
+    });
+  });
 });

@@ -198,7 +198,7 @@ require.register('src/index.js', function(require, module, exports) {
         DEFAULT_DAY_STARTS_AT = 0,
         DEFAULT_NIGHT_STARTS_AT = 18,
         DEFAULT_OFFSET = '+00:00',
-        DEFAULT_PARSE_KEYS = ['created', 'end', 'from', 'middle', 'nominalStart', 'rise', 'set', 'start', 'times', 'to', 'update'],
+        DEFAULT_PARSE_KEYS = ['created', 'end', 'from', 'rise', 'set', 'start', 'times', 'to', 'update'],
         FLAGS = {
       Y: 1,
       M: 2,
@@ -281,6 +281,16 @@ require.register('src/index.js', function(require, module, exports) {
         }
     
         return traverse(obj);
+      },
+    
+    
+      /**
+       * Determine if 'time' is a Time instance
+       * @param {Time} time
+       * @returns {Boolean}
+       */
+      isTime: function isTime(time) {
+        return time != null && time._manipulate != null && time._date != null;
       }
     };
     
@@ -295,12 +305,20 @@ require.register('src/index.js', function(require, module, exports) {
     
         this._date = DEFAULT_DATE;
         this._locale = null;
+        this._localOffset = 0;
         this._offset = 0;
         this._offsetString = DEFAULT_OFFSET;
         this.isValid = false;
         this.timeString = DEFAULT_DATE;
     
-        if (timeString == null) timeString = new Date().toISOString();
+        // Local "now"
+        if (timeString == null) {
+          var d = new Date(),
+              tz = -1 * d.getTimezoneOffset();
+    
+          d.setUTCMinutes(d.getUTCMinutes() + tz);
+          timeString = d.toISOString().replace('Z', minutesToOffsetString(tz));
+        }
         // Prevent regex denial of service
         if (timeString.length > 30) return;
     
@@ -328,6 +346,7 @@ require.register('src/index.js', function(require, module, exports) {
         }
     
         this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
+        this._localOffset = -1 * this._date.getTimezoneOffset();
         this.isValid = isValid(this._date);
         this.timeString = this.toString();
       }
@@ -767,7 +786,7 @@ require.register('src/index.js', function(require, module, exports) {
       };
     
       /**
-       * Retrieve relative day type based on number of days from now
+       * Retrieve relative day type based on number of days from "now"
        * @param {Number} daysFromNow
        * @returns {String}
        */
@@ -838,16 +857,16 @@ require.register('src/index.js', function(require, module, exports) {
       Time.prototype._monthDiff = function _monthDiff(time) {
         var wholeMonthDiff = (time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12 + (time._date.getUTCMonth() - this._date.getUTCMonth()),
             anchor = this._manipulate(wholeMonthDiff, 'M');
-        var adjust = undefined;
+        var adjust = void 0;
     
         if (time._date - anchor._date < 0) {
           var anchor2 = this._manipulate(wholeMonthDiff - 1, 'M');
     
           adjust = (time._date - anchor._date) / (anchor._date - anchor2._date);
         } else {
-          var anchor2 = this._manipulate(wholeMonthDiff + 1, 'M');
+          var _anchor = this._manipulate(wholeMonthDiff + 1, 'M');
     
-          adjust = (time._date - anchor._date) / (anchor2._date - anchor._date);
+          adjust = (time._date - anchor._date) / (_anchor._date - anchor._date);
         }
     
         return -(wholeMonthDiff + adjust);
@@ -888,7 +907,7 @@ require.register('src/index.js', function(require, module, exports) {
       };
     
       /**
-       * Retrieve numberified
+       * Retrieve number of milliseconds UTC
        * @returns {Number}
        */
     
@@ -897,16 +916,10 @@ require.register('src/index.js', function(require, module, exports) {
         if (!this.isValid) return NaN;
     
         var d = this._date;
-        var num = 0;
+        var num = +d;
     
-        if (this._offset != 0) {
-          // Reverse offset
-          d.setUTCMinutes(d.getUTCMinutes() - this._offset);
-          num = +d;
-          d.setUTCMinutes(d.getUTCMinutes() + this._offset);
-        } else {
-          num = +d;
-        }
+        // Reverse offset
+        if (this._offset != 0) num -= this._offset * 6e4;
     
         return num;
       };
@@ -1005,6 +1018,20 @@ require.register('src/index.js', function(require, module, exports) {
       }
     
       return value;
+    }
+    
+    /**
+     * Convert 'minutes' to offset string
+     * @param {Number} minutes
+     * @returns {String}
+     */
+    function minutesToOffsetString(minutes) {
+      var t = String(Math.abs(minutes / 60)).split('.'),
+          H = pad(t[0]),
+          m = t[1] ? parseInt(t[1], 10) * 0.6 : 0,
+          sign = minutes < 0 ? '-' : '+';
+    
+      return '' + sign + H + ':' + pad(m);
     }
 });
 require.register('test/src.js', function(require, module, exports) {

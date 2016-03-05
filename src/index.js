@@ -105,6 +105,15 @@ module.exports = {
     }
 
     return traverse(obj);
+  },
+
+  /**
+   * Determine if 'time' is a Time instance
+   * @param {Time} time
+   * @returns {Boolean}
+   */
+  isTime (time) {
+    return time != null && time._manipulate != null && time._date != null;
   }
 };
 
