@@ -1,6 +1,6 @@
 {
   "name": "@yr/date",
-  "description": "Moment/date utilities",
+  "description": "Efficient, immutable, utility for working with time/dates",
   "version": "2.4.4",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
