@@ -1,0 +1,59 @@
+{
+  "daysShort": [
+    "Sun",
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thur",
+    "Fri",
+    "Sat"
+  ],
+  "days": [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ],
+  "format": {
+    "LT" : "HH:mm",
+    "LTS" : "HH:mm:ss",
+    "L" : "DD/MM/YYYY",
+    "LL" : "D MMMM YYYY",
+    "LLL" : "D MMMM YYYY HH:mm",
+    "LLLL" : "dddd, D MMMM YYYY HH:mm"
+  },
+  "monthsShort": [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ],
+  "months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ],
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "tonight": "Tonight"
+}

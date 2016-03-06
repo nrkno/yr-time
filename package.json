@@ -1,15 +1,14 @@
 {
   "name": "@yr/date",
-  "description": "Moment/date utilities",
+  "description": "Efficient, immutable, utility for working with time/dates",
   "version": "2.4.4",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
-    "is-plain-obj": "1.1.x",
-    "moment": "2.11.x"
+    "is-plain-obj": "1.1.x"
   },
   "devDependencies": {
-    "buddy": "*",
-    "buddy-plugin-babel": "6.5.2-2",
+    "buddy": "4.x.x",
+    "buddy-plugin-babel": "6.x.x",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*"
@@ -27,12 +26,12 @@
     "build": {
       "targets": [
         {
-          "input": "src",
+          "input": "src/index.js",
           "output": ".",
           "modular": false
         },
         {
-          "input": "src/index.js",
+          "input": "test/src.js",
           "output": "test/lib.js",
           "boilerplate": true,
           "bootstrap": true
