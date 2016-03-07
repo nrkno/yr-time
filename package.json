@@ -1,5 +1,5 @@
 {
-  "name": "@yr/date",
+  "name": "@yr/time",
   "description": "Efficient, immutable, utility for working with time/dates",
   "version": "3.0.1",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
@@ -14,7 +14,7 @@
     "mocha-phantomjs": "*"
   },
   "main": "src/index.js",
-  "repository": "https://github.com/YR/date.git",
+  "repository": "https://github.com/YR/time.git",
   "license": "MIT",
   "scripts": {
     "prepublish": "buddy build",
