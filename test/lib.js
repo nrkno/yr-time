@@ -882,16 +882,16 @@ require.register('src/index.js', function(require, module, exports) {
       Time.prototype._monthDiff = function _monthDiff(time) {
         var wholeMonthDiff = (time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12 + (time._date.getUTCMonth() - this._date.getUTCMonth()),
             anchor = this._manipulate(wholeMonthDiff, 'M');
-        var adjust = void 0;
+        var adjust = undefined;
     
         if (time._date - anchor._date < 0) {
           var anchor2 = this._manipulate(wholeMonthDiff - 1, 'M');
     
           adjust = (time._date - anchor._date) / (anchor._date - anchor2._date);
         } else {
-          var _anchor = this._manipulate(wholeMonthDiff + 1, 'M');
+          var anchor2 = this._manipulate(wholeMonthDiff + 1, 'M');
     
-          adjust = (time._date - anchor._date) / (_anchor._date - anchor._date);
+          adjust = (time._date - anchor._date) / (anchor2._date - anchor._date);
         }
     
         return -(wholeMonthDiff + adjust);
@@ -1045,13 +1045,13 @@ require.register('test/src.js', function(require, module, exports) {
     module.exports = {
       en: {
   "daysShort": [
-    "Sun",
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thur",
-    "Fri",
-    "Sat"
+    "Sun.",
+    "Mon.",
+    "Tue.",
+    "Wed.",
+    "Thur.",
+    "Fri.",
+    "Sat."
   ],
   "days": [
     "Sunday",
@@ -1071,18 +1071,18 @@ require.register('test/src.js', function(require, module, exports) {
     "LLLL" : "dddd, D MMMM YYYY HH:mm"
   },
   "monthsShort": [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
+    "Jan.",
+    "Feb.",
+    "Mar.",
+    "Apr.",
     "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
+    "June",
+    "July",
+    "Aug.",
+    "Sep.",
+    "Oct.",
+    "Nov.",
+    "Dec."
   ],
   "months": [
     "January",
