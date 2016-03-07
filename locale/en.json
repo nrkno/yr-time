@@ -1,12 +1,12 @@
 {
   "daysShort": [
-    "Sun",
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thur",
-    "Fri",
-    "Sat"
+    "Sun.",
+    "Mon.",
+    "Tue.",
+    "Wed.",
+    "Thur.",
+    "Fri.",
+    "Sat."
   ],
   "days": [
     "Sunday",
@@ -26,18 +26,18 @@
     "LLLL" : "dddd, D MMMM YYYY HH:mm"
   },
   "monthsShort": [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
+    "Jan.",
+    "Feb.",
+    "Mar.",
+    "Apr.",
     "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
+    "June",
+    "July",
+    "Aug.",
+    "Sep.",
+    "Oct.",
+    "Nov.",
+    "Dec."
   ],
   "months": [
     "January",
