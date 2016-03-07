@@ -696,16 +696,16 @@ var Time = function () {
   Time.prototype._monthDiff = function _monthDiff(time) {
     var wholeMonthDiff = (time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12 + (time._date.getUTCMonth() - this._date.getUTCMonth()),
         anchor = this._manipulate(wholeMonthDiff, 'M');
-    var adjust = undefined;
+    var adjust = void 0;
 
     if (time._date - anchor._date < 0) {
       var anchor2 = this._manipulate(wholeMonthDiff - 1, 'M');
 
       adjust = (time._date - anchor._date) / (anchor._date - anchor2._date);
     } else {
-      var anchor2 = this._manipulate(wholeMonthDiff + 1, 'M');
+      var _anchor = this._manipulate(wholeMonthDiff + 1, 'M');
 
-      adjust = (time._date - anchor._date) / (anchor2._date - anchor._date);
+      adjust = (time._date - anchor._date) / (_anchor._date - anchor._date);
     }
 
     return -(wholeMonthDiff + adjust);
