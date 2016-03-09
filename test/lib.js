@@ -781,6 +781,22 @@ require.register('src/index.js', function(require, module, exports) {
       };
     
       /**
+       * Return instance at UTC time
+       * @returns {Time}
+       */
+    
+    
+      Time.prototype.utc = function utc() {
+        if (!this._offset) return this.clone();
+    
+        var t = this.subtract(this._offset, 'minutes');
+    
+        t._offset = 0;
+        t._offsetString = DEFAULT_OFFSET;
+        return update(t);
+      };
+    
+      /**
        * Clone instance
        * @returns {Time}
        */
