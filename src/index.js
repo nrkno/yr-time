@@ -584,6 +584,20 @@ class Time {
   }
 
   /**
+   * Return instance at UTC time
+   * @returns {Time}
+   */
+  utc () {
+    if (!this._offset) return this.clone();
+
+    let t = this.subtract(this._offset, 'minutes');
+
+    t._offset = 0;
+    t._offsetString = DEFAULT_OFFSET;
+    return update(t);
+  }
+
+  /**
    * Clone instance
    * @returns {Time}
    */

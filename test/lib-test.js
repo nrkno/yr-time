@@ -250,6 +250,24 @@ describe('time', function () {
       });
     });
 
+    describe('utc()', function () {
+      it('should return a cloned instance when no TZ offset', function () {
+        var t1 = time.create('2016-01-01T00:00:00')
+          , t2 = t1.utc();
+
+        expect(t1).to.not.equal(t2);
+        expect(t1.timeString).to.equal(t2.timeString);
+      });
+      it('should return a utc instance', function () {
+        var t1 = time.create('2016-01-01T00:00:00-02:00')
+          , t2 = t1.utc();
+
+        expect(t1).to.not.equal(t2);
+        expect(t2.timeString).to.equal('2016-01-01T02:00:00.000+00:00');
+        expect(t2._offset).to.equal(0);
+      });
+    });
+
     describe('manipulation', function () {
       describe('add()', function () {
         it('should return a new instance with added years', function () {
@@ -540,7 +558,7 @@ describe('time', function () {
       it('should handle month masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('M')).to.equal('1');
         expect(time.create('2016-01-01T00:00:00').format('MM')).to.equal('01');
-        expect(time.create('2016-01-01T00:00:00').locale(en).format('MMM')).to.equal('Jan');
+        expect(time.create('2016-01-01T00:00:00').locale(en).format('MMM')).to.equal('Jan.');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('MMMM')).to.equal('January');
         expect(time.create('2016-01-01T00:00:00-01:00').locale(en).format('MMMM')).to.equal('January');
       });
@@ -551,7 +569,7 @@ describe('time', function () {
       });
       it('should handle day of week masks', function () {
         expect(time.create('2016-01-01T00:00:00').format('d')).to.equal('5');
-        expect(time.create('2016-01-01T00:00:00').locale(en).format('ddd')).to.equal('Fri');
+        expect(time.create('2016-01-01T00:00:00').locale(en).format('ddd')).to.equal('Fri.');
         expect(time.create('2016-01-01T00:00:00').locale(en).format('dddd')).to.equal('Friday');
         expect(time.create('2016-01-01T00:00:00-01:00').locale(en).format('dddd')).to.equal('Friday');
       });
@@ -589,7 +607,7 @@ describe('time', function () {
       it('should handle relative day masks', function () {
         time.init({ dayStartsAt: 6 });
         expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr', 0)).to.equal('Today');
-        expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr')).to.equal('Fri');
+        expect(time.create('2016-01-01T07:00:00').locale(en).format('ddr')).to.equal('Fri.');
         expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 0)).to.equal('Today');
         expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr')).to.equal('Friday');
         expect(time.create('2016-01-01T07:00:00').locale(en).format('dddr', 1)).to.equal('Tomorrow');
