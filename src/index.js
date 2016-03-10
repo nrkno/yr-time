@@ -164,7 +164,7 @@ class Time {
       this._offsetString = offset;
     }
 
-    // Create UTC date at local time
+    // Create UTC date based on local time so we can always use UTC methods
     this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
@@ -298,7 +298,7 @@ class Time {
    */
   year (value) {
     if (value != null) return this._set(value, 'setUTCFullYear');
-    return this._date.getUTCFullYear();;
+    return this._date.getUTCFullYear();
   }
 
   /**
