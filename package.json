@@ -7,8 +7,8 @@
     "is-plain-obj": "1.1.x"
   },
   "devDependencies": {
-    "buddy": "4.x.x",
-    "buddy-plugin-babel": "6.x.x",
+    "buddy": "5.0.x",
+    "buddy-plugin-babel": "6.7.x",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*"
@@ -32,9 +32,7 @@
         },
         {
           "input": "test/src.js",
-          "output": "test/lib.js",
-          "boilerplate": true,
-          "bootstrap": true
+          "output": "test/lib.js"
         }
       ]
     }
