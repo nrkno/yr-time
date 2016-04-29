@@ -7,56 +7,55 @@
  * @license MIT
  */
 
-const isPlainObject = require('is-plain-obj')
+const isPlainObject = require('is-plain-obj');
 
-  , DEFAULT_DATE = 'Invalid Date'
-  , DEFAULT_DAY_STARTS_AT = 0
-  , DEFAULT_NIGHT_STARTS_AT = 18
-  , DEFAULT_OFFSET = '+00:00'
-  , DEFAULT_PARSE_KEYS = [
-      'created',
-      'end',
-      'from',
-      'rise',
-      'set',
-      'start',
-      'times',
-      'to',
-      'update'
-    ]
-  , FLAGS = {
-      Y: 1,
-      M: 2,
-      D: 4,
-      H: 8,
-      m: 16,
-      s: 32,
-      S: 64
-    }
-  , FLAGS_START_OF = {
-      Y: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D | FLAGS.M,
-      M: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D,
-      D: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H,
-      H: FLAGS.S | FLAGS.s | FLAGS.m,
-      m: FLAGS.S | FLAGS.s,
-      s: FLAGS.S
-    }
-    // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
-  , RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/
-  , RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|ZZ)/g
-  , RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g
-  , RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
-let dayStartsAt = DEFAULT_DAY_STARTS_AT
-  , nightStartsAt = DEFAULT_NIGHT_STARTS_AT
-  , parseKeys = DEFAULT_PARSE_KEYS;
+const DEFAULT_DATE = 'Invalid Date';
+const DEFAULT_DAY_STARTS_AT = 0;
+const DEFAULT_NIGHT_STARTS_AT = 18;
+const DEFAULT_OFFSET = '+00:00';
+const DEFAULT_PARSE_KEYS = [
+  'created',
+  'end',
+  'from',
+  'rise',
+  'set',
+  'start',
+  'times',
+  'to',
+  'update'
+];
+const FLAGS = {
+  Y: 1,
+  M: 2,
+  D: 4,
+  H: 8,
+  m: 16,
+  s: 32,
+  S: 64
+};
+const FLAGS_START_OF = {
+  Y: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D | FLAGS.M,
+  M: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D,
+  D: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H,
+  H: FLAGS.S | FLAGS.s | FLAGS.m,
+  m: FLAGS.S | FLAGS.s,
+  s: FLAGS.S
+};
+// YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
+const RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
+const RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
+const RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
+const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
+let dayStartsAt = DEFAULT_DAY_STARTS_AT;
+let nightStartsAt = DEFAULT_NIGHT_STARTS_AT;
+let parseKeys = DEFAULT_PARSE_KEYS;
 
 module.exports = {
   /**
    * Initialize with defaults
    * @param {Object} [options]
    */
-  init (options) {
-    options = options || {};
+  init (options = {}) {
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
     nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
     parseKeys = options.parseKeys || DEFAULT_PARSE_KEYS;
@@ -134,8 +133,8 @@ class Time {
 
     // Local "now"
     if (timeString == null) {
-      const d = new Date()
-        , offset = -1 * d.getTimezoneOffset();
+      const d = new Date();
+      const offset = -1 * d.getTimezoneOffset();
 
       d.setUTCMinutes(d.getUTCMinutes() + offset);
       timeString = d.toISOString().replace('Z', minutesToOffsetString(offset));
@@ -147,14 +146,14 @@ class Time {
 
     if (!match) return;
 
-    const year = +match[1]
-      , month = +match[2] || 1
-      , day = +match[3] || 1
-      , hour = +match[4] || 0
-      , minute = +match[5] || 0
-      , second = +match[6] || 0
-      , millisecond = +match[7] || 0
-      , offset = match[8] || '';
+    const year = +match[1];
+    const month = +match[2] || 1;
+    const day = +match[3] || 1;
+    const hour = +match[4] || 0;
+    const minute = +match[5] || 0;
+    const second = +match[6] || 0;
+    const millisecond = +match[7] || 0;
+    const offset = match[8] || '';
 
     // Handle TZ offset
     if (offset && offset != DEFAULT_OFFSET) {
@@ -206,9 +205,9 @@ class Time {
 
     unit = normalizeUnit(unit);
 
-    let diff = 0
-      , t1 = this
-      , t2 = time;
+    let diff = 0;
+    let t1 = this;
+    let t2 = time;
 
     if (unit == 'Y' || unit == 'M') {
       diff = t1._monthDiff(t2);
@@ -254,8 +253,8 @@ class Time {
       unit = normalizeUnit(unit);
 
       const flags = FLAGS_START_OF[unit];
-      let instance = this.clone()
-        , d = instance._date;
+      let instance = this.clone();
+      let d = instance._date;
 
       for (const dim in FLAGS) {
         if (flags & FLAGS[dim]) {
@@ -393,8 +392,8 @@ class Time {
 
     if (!unit || unit == 'S') return +this._date === +time._date;
 
-    let t1 = this
-      , t2 = time;
+    let t1 = this;
+    let t2 = time;
 
     // Correct for custom day start
     if (unit == 'D') {
@@ -446,18 +445,18 @@ class Time {
 
     if (!unit || unit == 'S') return +this._date < +time._date;
 
-    const Y1 = this.year()
-      , Y2 = time.year()
-      , M1 = this.month()
-      , M2 = time.month()
-      , D1 = this.date()
-      , D2 = time.date()
-      , H1 = this.hour()
-      , H2 = time.hour()
-      , m1 = this.minute()
-      , m2 = time.minute()
-      , s1 = this.second()
-      , s2 = time.second();
+    const Y1 = this.year();
+    const Y2 = time.year();
+    const M1 = this.month();
+    const M2 = time.month();
+    const D1 = this.date();
+    const D2 = time.date();
+    const H1 = this.hour();
+    const H2 = time.hour();
+    const m1 = this.minute();
+    const m2 = time.minute();
+    const s1 = this.second();
+    const s2 = time.second();
     let test = false;
 
     test = Y1 > Y2;
@@ -501,9 +500,8 @@ class Time {
     const relativeDay = (daysFromNow != null)
       ? this._getRelativeDay(daysFromNow)
       : '';
-
-    let escaped = []
-      , idx = 0;
+    let escaped = [];
+    let idx = 0;
 
     // Remove all escaped text (in [xxx])
     mask = mask.replace(RE_TOKEN_ESCAPE, (match) => {
@@ -616,8 +614,8 @@ class Time {
    * @returns {Time}
    */
   _set (value, method) {
-    let instance = this.clone()
-      , d = instance._date;
+    let instance = this.clone();
+    let d = instance._date;
 
     d[method](value);
     return update(instance);
@@ -650,8 +648,8 @@ class Time {
    */
   _manipulate (value, unit) {
     if (this.isValid) {
-      let instance = this.clone()
-        , d = instance._date;
+      let instance = this.clone();
+      let d = instance._date;
 
       switch (normalizeUnit(unit)) {
         case 'Y':
@@ -691,8 +689,8 @@ class Time {
    * @returns {Number}
    */
   _monthDiff (time) {
-    const wholeMonthDiff = ((time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12) + (time._date.getUTCMonth() - this._date.getUTCMonth())
-      , anchor = this._manipulate(wholeMonthDiff, 'M');
+    const wholeMonthDiff = ((time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12) + (time._date.getUTCMonth() - this._date.getUTCMonth());
+    const anchor = this._manipulate(wholeMonthDiff, 'M');
     let adjust;
 
     if (time._date - anchor._date < 0) {
@@ -833,10 +831,10 @@ function pad (value, length) {
  * @returns {String}
  */
 function minutesToOffsetString (minutes) {
-  const t = String(Math.abs(minutes / 60)).split('.')
-    , H = pad(t[0])
-    , m = t[1] ? (parseInt(t[1], 10) * 0.6) : 0
-    , sign = minutes < 0 ? '-' : '+';
+  const t = String(Math.abs(minutes / 60)).split('.');
+  const H = pad(t[0]);
+  const m = t[1] ? (parseInt(t[1], 10) * 0.6) : 0;
+  const sign = minutes < 0 ? '-' : '+';
 
   return `${sign}${H}:${pad(m)}`;
 }

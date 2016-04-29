@@ -7,13 +7,14 @@
  * @license MIT
  */
 
-var isPlainObject = require('is-plain-obj'),
-    DEFAULT_DATE = 'Invalid Date',
-    DEFAULT_DAY_STARTS_AT = 0,
-    DEFAULT_NIGHT_STARTS_AT = 18,
-    DEFAULT_OFFSET = '+00:00',
-    DEFAULT_PARSE_KEYS = ['created', 'end', 'from', 'rise', 'set', 'start', 'times', 'to', 'update'],
-    FLAGS = {
+var isPlainObject = require('is-plain-obj');
+
+var DEFAULT_DATE = 'Invalid Date';
+var DEFAULT_DAY_STARTS_AT = 0;
+var DEFAULT_NIGHT_STARTS_AT = 18;
+var DEFAULT_OFFSET = '+00:00';
+var DEFAULT_PARSE_KEYS = ['created', 'end', 'from', 'rise', 'set', 'start', 'times', 'to', 'update'];
+var FLAGS = {
   Y: 1,
   M: 2,
   D: 4,
@@ -21,24 +22,23 @@ var isPlainObject = require('is-plain-obj'),
   m: 16,
   s: 32,
   S: 64
-},
-    FLAGS_START_OF = {
+};
+var FLAGS_START_OF = {
   Y: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D | FLAGS.M,
   M: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H | FLAGS.D,
   D: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H,
   H: FLAGS.S | FLAGS.s | FLAGS.m,
   m: FLAGS.S | FLAGS.s,
   s: FLAGS.S
-}
+};
 // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
-,
-    RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/,
-    RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|ZZ)/g,
-    RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g,
-    RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
-var dayStartsAt = DEFAULT_DAY_STARTS_AT,
-    nightStartsAt = DEFAULT_NIGHT_STARTS_AT,
-    parseKeys = DEFAULT_PARSE_KEYS;
+var RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
+var RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
+var RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
+var RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
+var dayStartsAt = DEFAULT_DAY_STARTS_AT;
+var nightStartsAt = DEFAULT_NIGHT_STARTS_AT;
+var parseKeys = DEFAULT_PARSE_KEYS;
 
 module.exports = {
   /**
@@ -46,8 +46,9 @@ module.exports = {
    * @param {Object} [options]
    */
 
-  init: function init(options) {
-    options = options || {};
+  init: function init() {
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
     nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
     parseKeys = options.parseKeys || DEFAULT_PARSE_KEYS;
@@ -128,8 +129,8 @@ var Time = function () {
 
     // Local "now"
     if (timeString == null) {
-      var d = new Date(),
-          _offset = -1 * d.getTimezoneOffset();
+      var d = new Date();
+      var _offset = -1 * d.getTimezoneOffset();
 
       d.setUTCMinutes(d.getUTCMinutes() + _offset);
       timeString = d.toISOString().replace('Z', minutesToOffsetString(_offset));
@@ -141,14 +142,14 @@ var Time = function () {
 
     if (!match) return;
 
-    var year = +match[1],
-        month = +match[2] || 1,
-        day = +match[3] || 1,
-        hour = +match[4] || 0,
-        minute = +match[5] || 0,
-        second = +match[6] || 0,
-        millisecond = +match[7] || 0,
-        offset = match[8] || '';
+    var year = +match[1];
+    var month = +match[2] || 1;
+    var day = +match[3] || 1;
+    var hour = +match[4] || 0;
+    var minute = +match[5] || 0;
+    var second = +match[6] || 0;
+    var millisecond = +match[7] || 0;
+    var offset = match[8] || '';
 
     // Handle TZ offset
     if (offset && offset != DEFAULT_OFFSET) {
@@ -158,7 +159,7 @@ var Time = function () {
       this._offsetString = offset;
     }
 
-    // Create UTC date at local time
+    // Create UTC date based on local time so we can always use UTC methods
     this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
@@ -206,9 +207,9 @@ var Time = function () {
 
     unit = normalizeUnit(unit);
 
-    var diff = 0,
-        t1 = this,
-        t2 = time;
+    var diff = 0;
+    var t1 = this;
+    var t2 = time;
 
     if (unit == 'Y' || unit == 'M') {
       diff = t1._monthDiff(t2);
@@ -256,8 +257,8 @@ var Time = function () {
       unit = normalizeUnit(unit);
 
       var flags = FLAGS_START_OF[unit];
-      var instance = this.clone(),
-          d = instance._date;
+      var instance = this.clone();
+      var d = instance._date;
 
       for (var dim in FLAGS) {
         if (flags & FLAGS[dim]) {
@@ -302,7 +303,7 @@ var Time = function () {
 
   Time.prototype.year = function year(value) {
     if (value != null) return this._set(value, 'setUTCFullYear');
-    return this._date.getUTCFullYear();;
+    return this._date.getUTCFullYear();
   };
 
   /**
@@ -413,8 +414,8 @@ var Time = function () {
 
     if (!unit || unit == 'S') return +this._date === +time._date;
 
-    var t1 = this,
-        t2 = time;
+    var t1 = this;
+    var t2 = time;
 
     // Correct for custom day start
     if (unit == 'D') {
@@ -453,18 +454,18 @@ var Time = function () {
 
     if (!unit || unit == 'S') return +this._date < +time._date;
 
-    var Y1 = this.year(),
-        Y2 = time.year(),
-        M1 = this.month(),
-        M2 = time.month(),
-        D1 = this.date(),
-        D2 = time.date(),
-        H1 = this.hour(),
-        H2 = time.hour(),
-        m1 = this.minute(),
-        m2 = time.minute(),
-        s1 = this.second(),
-        s2 = time.second();
+    var Y1 = this.year();
+    var Y2 = time.year();
+    var M1 = this.month();
+    var M2 = time.month();
+    var D1 = this.date();
+    var D2 = time.date();
+    var H1 = this.hour();
+    var H2 = time.hour();
+    var m1 = this.minute();
+    var m2 = time.minute();
+    var s1 = this.second();
+    var s2 = time.second();
     var test = false;
 
     test = Y1 > Y2;
@@ -512,9 +513,8 @@ var Time = function () {
     if (mask.length > 100) return '';
 
     var relativeDay = daysFromNow != null ? this._getRelativeDay(daysFromNow) : '';
-
-    var escaped = [],
-        idx = 0;
+    var escaped = [];
+    var idx = 0;
 
     // Remove all escaped text (in [xxx])
     mask = mask.replace(RE_TOKEN_ESCAPE, function (match) {
@@ -633,8 +633,8 @@ var Time = function () {
 
 
   Time.prototype._set = function _set(value, method) {
-    var instance = this.clone(),
-        d = instance._date;
+    var instance = this.clone();
+    var d = instance._date;
 
     d[method](value);
     return update(instance);
@@ -667,8 +667,8 @@ var Time = function () {
 
   Time.prototype._manipulate = function _manipulate(value, unit) {
     if (this.isValid) {
-      var instance = this.clone(),
-          d = instance._date;
+      var instance = this.clone();
+      var d = instance._date;
 
       switch (normalizeUnit(unit)) {
         case 'Y':
@@ -710,8 +710,8 @@ var Time = function () {
 
 
   Time.prototype._monthDiff = function _monthDiff(time) {
-    var wholeMonthDiff = (time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12 + (time._date.getUTCMonth() - this._date.getUTCMonth()),
-        anchor = this._manipulate(wholeMonthDiff, 'M');
+    var wholeMonthDiff = (time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12 + (time._date.getUTCMonth() - this._date.getUTCMonth());
+    var anchor = this._manipulate(wholeMonthDiff, 'M');
     var adjust = void 0;
 
     if (time._date - anchor._date < 0) {
@@ -861,10 +861,10 @@ function pad(value, length) {
  * @returns {String}
  */
 function minutesToOffsetString(minutes) {
-  var t = String(Math.abs(minutes / 60)).split('.'),
-      H = pad(t[0]),
-      m = t[1] ? parseInt(t[1], 10) * 0.6 : 0,
-      sign = minutes < 0 ? '-' : '+';
+  var t = String(Math.abs(minutes / 60)).split('.');
+  var H = pad(t[0]);
+  var m = t[1] ? parseInt(t[1], 10) * 0.6 : 0;
+  var sign = minutes < 0 ? '-' : '+';
 
   return '' + sign + H + ':' + pad(m);
 }

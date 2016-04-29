@@ -2,19 +2,19 @@
 
 var en, expect, nb, time;
 
-// Make it work in node..
+// Make it work in browser
 try {
-  en = require('../locale/en');
-  expect = require('expect.js');
-  nb = require('../locale/nb');
-  time = require('../src/index');
-// .. or browser
-} catch (err) {
   // if (err) console.log(err);
   en = require('test/src.js').en;
   expect = window.expect;
   nb = require('test/src.js').nb;
   time = require('test/src.js').time;
+// .. or Node
+} catch (err) {
+  en = require('../locale/en');
+  expect = require('expect.js');
+  nb = require('../locale/nb');
+  time = require('../src/index');
 }
 
 describe('time', function () {
@@ -87,13 +87,13 @@ describe('time', function () {
 
     describe('valueOf()', function () {
       it('should return milliseconds UTC', function () {
-        var tz = (new Date()).getTimezoneOffset() * -1
-          , t1 = time.create() // Local
-          , t2 = t1.subtract(tz, 'm') // Local to UTCish
-          , t3 = time.create((new Date()).toISOString()) // UTC
-          , tzDiff = Math.abs(tz) * 6e4;
+        var tz = (new Date()).getTimezoneOffset() * -1;
+        var t1 = time.create(); // Local
+        var t2 = t1.subtract(tz, 'm'); // Local to UTCish
+        var t3 = time.create((new Date()).toISOString()); // UTC
+        var tzDiff = Math.abs(tz) * 6e4;
 
-        expect(+t1 - +t2).to.be.within(36e5 - 20, 36e5 + 20);
+        expect(+t1 - +t2).to.be.within((36e5 * (tz / 60)) - 20, (36e5 * (tz / 60)) + 20);
         expect(+t1 - +t3).to.be.within(tzDiff - 20, tzDiff + 20);
         expect(+t2 - +t3).to.be.within(-20, 20);
         expect(+t3 - Date.now()).to.be.within(-20, 20);
@@ -233,16 +233,16 @@ describe('time', function () {
 
     describe('clone()', function () {
       it('should create a new copy with same values as the original', function () {
-        var t1 = time.create('2015-12-31T23:15:00+01:15')
-          , t2 = t1.clone();
+        var t1 = time.create('2015-12-31T23:15:00+01:15');
+        var t2 = t1.clone();
 
         expect(t2).to.not.equal(t1);
         expect(t2._date.toISOString()).to.equal(t1._date.toISOString());
         expect(t2._offset).to.equal(t1._offset);
       });
       it('should create a new copy with same values as the original, even if invalid', function () {
-        var t1 = time.create('foo')
-          , t2 = t1.clone();
+        var t1 = time.create('foo');
+        var t2 = t1.clone();
 
         expect(t2).to.not.equal(t1);
         expect(t2._date).to.equal(t1._date);
@@ -252,15 +252,15 @@ describe('time', function () {
 
     describe('utc()', function () {
       it('should return a cloned instance when no TZ offset', function () {
-        var t1 = time.create('2016-01-01T00:00:00')
-          , t2 = t1.utc();
+        var t1 = time.create('2016-01-01T00:00:00');
+        var t2 = t1.utc();
 
         expect(t1).to.not.equal(t2);
         expect(t1.timeString).to.equal(t2.timeString);
       });
       it('should return a utc instance', function () {
-        var t1 = time.create('2016-01-01T00:00:00-02:00')
-          , t2 = t1.utc();
+        var t1 = time.create('2016-01-01T00:00:00-02:00');
+        var t2 = t1.utc();
 
         expect(t1).to.not.equal(t2);
         expect(t2.timeString).to.equal('2016-01-01T02:00:00.000+00:00');
@@ -271,16 +271,16 @@ describe('time', function () {
     describe('manipulation', function () {
       describe('add()', function () {
         it('should return a new instance with added years', function () {
-          var t1 = time.create('2015-12-31T23:15:00')
-            , t2 = t1.add(1, 'Y');
+          var t1 = time.create('2015-12-31T23:15:00');
+          var t2 = t1.add(1, 'Y');
 
           expect(t2).to.not.equal(t1);
           expect(t2.year()).to.equal(2016);
           expect(t2.timeString).to.equal('2016-12-31T23:15:00.000+00:00')
         });
         it('should return a new instance with added months', function () {
-          var t1 = time.create('2015-12-31T23:15:00')
-            , t2 = t1.add(1, 'M');
+          var t1 = time.create('2015-12-31T23:15:00');
+          var t2 = t1.add(1, 'M');
 
           expect(t2).to.not.equal(t1);
           expect(t2.month()).to.equal(0);
@@ -288,8 +288,8 @@ describe('time', function () {
           expect(t2.add(14, 'M').year()).to.equal(2017);
         });
         it('should return a new instance with added days', function () {
-          var t1 = time.create('2015-12-31T23:15:00')
-            , t2 = t1.add(1, 'D');
+          var t1 = time.create('2015-12-31T23:15:00');
+          var t2 = t1.add(1, 'D');
 
           expect(t2).to.not.equal(t1);
           expect(t2.date()).to.equal(1);
@@ -298,8 +298,8 @@ describe('time', function () {
           expect(t2.add(365, 'D').year()).to.equal(2016);
         });
         it('should return a new instance with added hours', function () {
-          var t1 = time.create('2015-12-31T23:15:00')
-            , t2 = t1.add(1, 'H');
+          var t1 = time.create('2015-12-31T23:15:00');
+          var t2 = t1.add(1, 'H');
 
           expect(t2).to.not.equal(t1);
           expect(t2.hour()).to.equal(0);
@@ -309,8 +309,8 @@ describe('time', function () {
           expect(t2.add(28, 'H').date()).to.equal(2);
         });
         it('should return a new instance with added minutes', function () {
-          var t1 = time.create('2015-12-31T23:15:00')
-            , t2 = t1.add(30, 'm');
+          var t1 = time.create('2015-12-31T23:15:00');
+          var t2 = t1.add(30, 'm');
 
           expect(t2).to.not.equal(t1);
           expect(t2.minute()).to.equal(45);
@@ -325,23 +325,23 @@ describe('time', function () {
 
       describe('subtract()', function () {
         it('should return a new instance with subtracted years', function () {
-          var t1 = time.create('2015-12-31T23:15:00')
-            , t2 = t1.subtract(1, 'Y');
+          var t1 = time.create('2015-12-31T23:15:00');
+          var t2 = t1.subtract(1, 'Y');
 
           expect(t2).to.not.equal(t1);
           expect(t2.year()).to.equal(2014);
         });
         it('should return a new instance with subtracted months', function () {
-          var t1 = time.create('2015-12-31T23:15:00')
-            , t2 = t1.subtract(1, 'M');
+          var t1 = time.create('2015-12-31T23:15:00');
+          var t2 = t1.subtract(1, 'M');
 
           expect(t2).to.not.equal(t1);
           expect(t2.month()).to.equal(11);
           expect(t2.subtract(14, 'M').year()).to.equal(2014);
         });
         it('should return a new instance with subtracted days', function () {
-          var t1 = time.create('2016-01-01T00:15:00')
-            , t2 = t1.subtract(1, 'D');
+          var t1 = time.create('2016-01-01T00:15:00');
+          var t2 = t1.subtract(1, 'D');
 
           expect(t2).to.not.equal(t1);
           expect(t2.date()).to.equal(31);
@@ -350,8 +350,8 @@ describe('time', function () {
           expect(t2.subtract(366, 'D').year()).to.equal(2014);
         });
         it('should return a new instance with subtracted hours', function () {
-          var t1 = time.create('2016-01-01T00:15:00')
-            , t2 = t1.subtract(1, 'H');
+          var t1 = time.create('2016-01-01T00:15:00');
+          var t2 = t1.subtract(1, 'H');
 
           expect(t2).to.not.equal(t1);
           expect(t2.hour()).to.equal(23);
@@ -361,8 +361,8 @@ describe('time', function () {
           expect(t2.subtract(28, 'H').date()).to.equal(30);
         });
         it('should return a new instance with subtracted minutes', function () {
-          var t1 = time.create('2016-01-01T00:15:00')
-            , t2 = t1.subtract(30, 'm');
+          var t1 = time.create('2016-01-01T00:15:00');
+          var t2 = t1.subtract(30, 'm');
 
           expect(t2).to.not.equal(t1);
           expect(t2.minute()).to.equal(45);
