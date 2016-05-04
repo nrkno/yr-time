@@ -1,7 +1,7 @@
 {
   "name": "@yr/time",
   "description": "Efficient, immutable, utility for working with time/dates",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "is-plain-obj": "1.1.x"
