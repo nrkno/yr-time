@@ -167,11 +167,12 @@ _m_['src/index.js']=(function(module,exports){
   var parseKeys = DEFAULT_PARSE_KEYS;
   
   module.exports = {
+    isTime: isTime,
+  
     /**
      * Initialize with defaults
      * @param {Object} [options]
      */
-  
     init: function init() {
       var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
   
@@ -187,6 +188,8 @@ _m_['src/index.js']=(function(module,exports){
      * @returns {Time}
      */
     create: function create(timeString) {
+      // Return if passed Time instance
+      if (timeString && 'string' != typeof timeString && isTime(timeString)) return timeString;
       return new Time(timeString);
     },
     now: function now() {
@@ -224,16 +227,6 @@ _m_['src/index.js']=(function(module,exports){
       }
   
       return traverse(obj);
-    },
-  
-  
-    /**
-     * Determine if 'time' is a Time instance
-     * @param {Time} time
-     * @returns {Boolean}
-     */
-    isTime: function isTime(time) {
-      return time != null && time._manipulate != null && time._date != null;
     }
   };
   
@@ -245,6 +238,9 @@ _m_['src/index.js']=(function(module,exports){
   
     function Time(timeString) {
       babelHelpers.classCallCheck(this, Time);
+  
+      // Return if timeString not a string
+      if (timeString && 'string' != typeof timeString) return timeString;
   
       this._date = DEFAULT_DATE;
       this._locale = null;
@@ -952,6 +948,15 @@ _m_['src/index.js']=(function(module,exports){
    */
   function isValid(date) {
     return Object.prototype.toString.call(date) == '[object Date]' && !isNaN(date.getTime());
+  }
+  
+  /**
+   * Determine if 'time' is a Time instance
+   * @param {Time} time
+   * @returns {Boolean}
+   */
+  function isTime(time) {
+    return time != null && time._manipulate != null && time._date != null;
   }
   
   /**

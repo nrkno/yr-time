@@ -22,9 +22,15 @@ describe('time', function () {
     it('should handle invalid time strings', function () {
       expect(time.create('foo')._date).to.equal('Invalid Date');
       expect(time.create('2016-foo')._date).to.equal('Invalid Date');
+      expect(time.create({})).to.eql({});
     });
     it('should handle arbitrarily long time strings', function () {
       expect(time.create('foo000000oooooooooooooooooooooooooo')._date).to.equal('Invalid Date');
+    });
+    it('should return passed Time instance', function () {
+      const t = time.create('2016');
+
+      expect(time.create(t)).to.equal(t);
     });
     it('should default to now if no time string', function () {
       expect(time.create()._date).to.be.a(Date);

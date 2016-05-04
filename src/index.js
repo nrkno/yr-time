@@ -51,6 +51,8 @@ let nightStartsAt = DEFAULT_NIGHT_STARTS_AT;
 let parseKeys = DEFAULT_PARSE_KEYS;
 
 module.exports = {
+  isTime,
+
   /**
    * Initialize with defaults
    * @param {Object} [options]
@@ -67,6 +69,8 @@ module.exports = {
    * @returns {Time}
    */
   create (timeString) {
+    // Return if passed Time instance
+    if (timeString && 'string' != typeof timeString && isTime(timeString)) return timeString;
     return new Time(timeString);
   },
 
@@ -106,15 +110,6 @@ module.exports = {
     }
 
     return traverse(obj);
-  },
-
-  /**
-   * Determine if 'time' is a Time instance
-   * @param {Time} time
-   * @returns {Boolean}
-   */
-  isTime (time) {
-    return time != null && time._manipulate != null && time._date != null;
   }
 };
 
@@ -124,6 +119,9 @@ class Time {
    * @param {String} timeString
    */
   constructor (timeString) {
+    // Return if timeString not a string
+    if (timeString && 'string' != typeof timeString) return timeString;
+
     this._date = DEFAULT_DATE;
     this._locale = null;
     this._offset = 0;
@@ -796,6 +794,15 @@ function normalizeUnit (unit) {
 function isValid (date) {
   return Object.prototype.toString.call(date) == '[object Date]'
     && !isNaN(date.getTime());
+}
+
+/**
+ * Determine if 'time' is a Time instance
+ * @param {Time} time
+ * @returns {Boolean}
+ */
+function isTime (time) {
+  return time != null && time._manipulate != null && time._date != null;
 }
 
 /**
