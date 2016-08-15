@@ -601,7 +601,10 @@ class Time {
    * @returns {Time}
    */
   now () {
-    return (new Time()).offset(this._offset);
+    let instance = (new Time()).offset(this._offset);
+
+    instance._locale = this._locale;
+    return instance;
   }
 
   /**
