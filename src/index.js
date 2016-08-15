@@ -56,6 +56,9 @@ module.exports = {
   /**
    * Initialize with defaults
    * @param {Object} [options]
+   *  - {Number} dayStartsAt
+   *  - {Number} nightStartsAt
+   *  - {Array} parseKeys
    */
   init (options = {}) {
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
@@ -134,13 +137,7 @@ class Time {
     this.timeString = DEFAULT_DATE;
 
     // Local "now"
-    if (timeString == null) {
-      const d = new Date();
-      const offset = -1 * d.getTimezoneOffset();
-
-      d.setUTCMinutes(d.getUTCMinutes() + offset);
-      timeString = d.toISOString().replace('Z', minutesToOffsetString(offset));
-    }
+    if (timeString == null) timeString = clientNow();
     // Prevent regex denial of service
     if (timeString.length > 30) return;
 
@@ -169,6 +166,22 @@ class Time {
     this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
+  }
+
+  /**
+   * Modify TimeZone offset with new 'value' in minutes
+   * @param {Number} value
+   * @returns {Time}
+   */
+  offset (value) {
+    if (value == this._offset) return this;
+
+    let instance = this.utc()._manipulate(value, 'minutes');
+
+    instance._offset = value;
+    instance._offsetString = minutesToOffsetString(value);
+    update(instance);
+    return instance;
   }
 
   /**
@@ -584,7 +597,15 @@ class Time {
   }
 
   /**
-   * Return instance at UTC time
+   * Retrieve instance of current time
+   * @returns {Time}
+   */
+  now () {
+    return (new Time()).offset(this._offset);
+  }
+
+  /**
+   * Retrieve instance at UTC time
    * @returns {Time}
    */
   utc () {
@@ -674,7 +695,7 @@ class Time {
           d.setUTCSeconds(d.getUTCSeconds() + value);
           break;
         case 'S':
-          d.setUTCMilliseconds(s.getUTCMilliseconds() + value);
+          d.setUTCMilliseconds(d.getUTCMilliseconds() + value);
           break;
       }
 
@@ -736,6 +757,18 @@ class Time {
 }
 
 /**
+ * Retrieve timestring for client "now"
+ * @returns {String}
+ */
+function clientNow () {
+  const d = new Date();
+  const offset = -1 * d.getTimezoneOffset();
+
+  d.setUTCMinutes(d.getUTCMinutes() + offset);
+  return d.toISOString().replace('Z', minutesToOffsetString(offset));
+}
+
+/**
  * Update 'instance' state
  * @param {Time} instance
  * @returns {Time}
@@ -784,6 +817,7 @@ function normalizeUnit (unit) {
       return 's';
     case 'millisecond':
     case 'milliseconds':
+    case 'ms':
     case 'S':
       return 'S';
   }

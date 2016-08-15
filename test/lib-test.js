@@ -32,7 +32,7 @@ describe('time', function () {
 
       expect(time.create(t)).to.equal(t);
     });
-    it('should default to now if no time string', function () {
+    it('should default to "now" if no time string', function () {
       expect(time.create()._date).to.be.a(Date);
       expect(time.create()._offset).to.equal((new Date()).getTimezoneOffset() * -1);
     });
@@ -256,6 +256,22 @@ describe('time', function () {
       });
     });
 
+    describe('offset()', function () {
+      it('should return same instance if same offset', function () {
+        var t = time.create('2016-01-01T00:00:00+01:00');
+
+        expect(t.offset(60)).to.equal(t);
+      });
+      it('should return a new instance with new offset', function () {
+        var t1 = time.create('2016-01-01T00:00:00+01:00');
+        var t2 = t1.offset(-60);
+
+        expect(t1).to.not.equal(t2);
+        expect(+t2.utc()).to.equal(+t1.utc());
+        expect(t2.toString()).to.equal('2015-12-31T22:00:00.000-01:00');
+      });
+    });
+
     describe('utc()', function () {
       it('should return a cloned instance when no TZ offset', function () {
         var t1 = time.create('2016-01-01T00:00:00');
@@ -274,6 +290,23 @@ describe('time', function () {
       });
     });
 
+    describe('now()', function () {
+      it('should return an instance with current time', function () {
+        var t1 = time.create('2016-01-01T00:00:00+00:00');
+        var t2 = t1.now();
+        var d = Date.now();
+
+        expect(d - +t2).to.be.within(0, 20);
+      });
+      it('should return an instance with current time, preserving offset', function () {
+        var t1 = time.create('2016-01-01T02:00:00+02:00');
+        var t2 = t1.now();
+        var d = Date.now();
+
+        expect(d - +t2.utc()).to.be.within(0, 20);
+      });
+    });
+
     describe('manipulation', function () {
       describe('add()', function () {
         it('should return a new instance with added years', function () {
@@ -282,7 +315,7 @@ describe('time', function () {
 
           expect(t2).to.not.equal(t1);
           expect(t2.year()).to.equal(2016);
-          expect(t2.timeString).to.equal('2016-12-31T23:15:00.000+00:00')
+          expect(t2.timeString).to.equal('2016-12-31T23:15:00.000+00:00');
         });
         it('should return a new instance with added months', function () {
           var t1 = time.create('2015-12-31T23:15:00');
@@ -290,7 +323,7 @@ describe('time', function () {
 
           expect(t2).to.not.equal(t1);
           expect(t2.month()).to.equal(0);
-          expect(t2.timeString).to.equal('2016-01-31T23:15:00.000+00:00')
+          expect(t2.timeString).to.equal('2016-01-31T23:15:00.000+00:00');
           expect(t2.add(14, 'M').year()).to.equal(2017);
         });
         it('should return a new instance with added days', function () {
