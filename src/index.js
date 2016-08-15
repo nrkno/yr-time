@@ -74,8 +74,12 @@ module.exports = {
     return new Time(timeString);
   },
 
+  /**
+   * Retrieve instance at current client time
+   * @returns {Time}
+   */
   now () {
-    return Date.now();
+    return this.create().utc();
   },
 
   /**

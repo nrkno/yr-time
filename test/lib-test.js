@@ -701,10 +701,12 @@ describe('time', function () {
   });
 
   describe('now()', function () {
-    it('should return UTC epoch timestamp', function () {
+    it('should return an instance for current time in UTC', function () {
+      var t = time.now();
       var tzDiff = Math.abs((new Date()).getTimezoneOffset()) * 6e4;
 
-      expect(+time.create() - time.now()).to.be.within(tzDiff - 20, tzDiff + 20);
+      expect(+time.create() - +t).to.be.within(tzDiff - 20, tzDiff + 20);
+      expect(t._offset).to.equal(0);
     });
   });
 
