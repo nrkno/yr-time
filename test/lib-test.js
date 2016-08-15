@@ -736,9 +736,11 @@ describe('time', function () {
   describe('now()', function () {
     it('should return an instance for current time in UTC', function () {
       var t = time.now();
+      var d = Date.now();
       var tzDiff = Math.abs((new Date()).getTimezoneOffset()) * 6e4;
 
       expect(+time.create() - +t).to.be.within(tzDiff - 20, tzDiff + 20);
+      expect(d - +t).to.be.within(0, 2);
       expect(t._offset).to.equal(0);
     });
   });
