@@ -7,8 +7,8 @@
     "is-plain-obj": "1.1.x"
   },
   "devDependencies": {
-    "buddy": "5.0.x",
-    "buddy-plugin-babel": "6.7.x",
+    "buddy": "5.1.x",
+    "buddy-plugin-babel": "6.13.x",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*"
@@ -16,6 +16,9 @@
   "main": "src/index.js",
   "repository": "https://github.com/YR/time.git",
   "license": "MIT",
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "scripts": {
     "prepublish": "buddy build",
     "test": "NODE_ENV=test mocha test/lib-test.js --reporter spec",
