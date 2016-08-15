@@ -34,13 +34,15 @@ If no timezone offset is specified, the time instance is handled as UTC (`+00:00
 
 If `timeString` is omitted altogether, an instance is created with time set to current machine time and timezone offset. 
 
-**now()**: number of milliseconds elapsed since 1 January 1970 00:00:00 UTC (`Date.now()`)
+**now()**: create a `Time` instance based on number of milliseconds elapsed since 1 January 1970 00:00:00 UTC (`Date.now() == Time.now().toValue()`)
 
 **parse(_obj_)**: recursively parse all time strings found in `obj` into `Time` instances. Uses the whitelist of `parseKeys` property names set via `init()`. **Note**: properties are mutated in place.
 
 **isTime(_time_)**: determine if `time` is a `Time` instance.
 
 ### Time instances
+
+**offset(_value)**: update an instance's TimeZone offset with `value` (in minutes).  Returns a new `Time` instance.
 
 **add(_value_, _unit_)**: add specified `value` in specified `unit` to the instance. Returns a new `Time` instance:
 
@@ -168,5 +170,7 @@ Escape characters in formatting masks by surrounding them with square brackets:
 time.create('2016-12-01T12:00:00')
   .format('[it is now] HH:mm'); //=> it is now 12:00
 ```
+
+**now()**: clone instance and set to current time. Returns a new `Time` instance.
 
 **clone()**: clone intance. Returns a new `Time` instance.
