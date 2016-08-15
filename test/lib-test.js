@@ -28,7 +28,7 @@ describe('time', function () {
       expect(time.create('foo000000oooooooooooooooooooooooooo')._date).to.equal('Invalid Date');
     });
     it('should return passed Time instance', function () {
-      const t = time.create('2016');
+      var t = time.create('2016');
 
       expect(time.create(t)).to.equal(t);
     });

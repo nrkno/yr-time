@@ -46,6 +46,9 @@ module.exports = {
   /**
    * Initialize with defaults
    * @param {Object} [options]
+   *  - {Number} dayStartsAt
+   *  - {Number} nightStartsAt
+   *  - {Array} parseKeys
    */
   init: function init() {
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -66,8 +69,14 @@ module.exports = {
     if (timeString && 'string' != typeof timeString && isTime(timeString)) return timeString;
     return new Time(timeString);
   },
+
+
+  /**
+   * Retrieve instance at current client time
+   * @returns {Time}
+   */
   now: function now() {
-    return Date.now();
+    return this.create().utc();
   },
 
 
@@ -109,7 +118,6 @@ var Time = function () {
    * Constructor
    * @param {String} timeString
    */
-
   function Time(timeString) {
     babelHelpers.classCallCheck(this, Time);
 
@@ -124,13 +132,7 @@ var Time = function () {
     this.timeString = DEFAULT_DATE;
 
     // Local "now"
-    if (timeString == null) {
-      var d = new Date();
-      var _offset = -1 * d.getTimezoneOffset();
-
-      d.setUTCMinutes(d.getUTCMinutes() + _offset);
-      timeString = d.toISOString().replace('Z', minutesToOffsetString(_offset));
-    }
+    if (timeString == null) timeString = clientNow();
     // Prevent regex denial of service
     if (timeString.length > 30) return;
 
@@ -160,6 +162,24 @@ var Time = function () {
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
   }
+
+  /**
+   * Modify TimeZone offset with new 'value' in minutes
+   * @param {Number} value
+   * @returns {Time}
+   */
+
+
+  Time.prototype.offset = function offset(value) {
+    if (value == this._offset) return this;
+
+    var instance = this.utc()._manipulate(value, 'minutes');
+
+    instance._offset = value;
+    instance._offsetString = minutesToOffsetString(value);
+    update(instance);
+    return instance;
+  };
 
   /**
    * Add 'value' of 'unit' (years|months|days|hours|minutes|seconds|milliseconds)
@@ -591,7 +611,17 @@ var Time = function () {
   };
 
   /**
-   * Return instance at UTC time
+   * Retrieve instance of current time
+   * @returns {Time}
+   */
+
+
+  Time.prototype.now = function now() {
+    return new Time().offset(this._offset);
+  };
+
+  /**
+   * Retrieve instance at UTC time
    * @returns {Time}
    */
 
@@ -687,7 +717,7 @@ var Time = function () {
           d.setUTCSeconds(d.getUTCSeconds() + value);
           break;
         case 'S':
-          d.setUTCMilliseconds(s.getUTCMilliseconds() + value);
+          d.setUTCMilliseconds(d.getUTCMilliseconds() + value);
           break;
       }
 
@@ -759,12 +789,24 @@ var Time = function () {
 }();
 
 /**
+ * Retrieve timestring for client "now"
+ * @returns {String}
+ */
+
+
+function clientNow() {
+  var d = new Date();
+  var offset = -1 * d.getTimezoneOffset();
+
+  d.setUTCMinutes(d.getUTCMinutes() + offset);
+  return d.toISOString().replace('Z', minutesToOffsetString(offset));
+}
+
+/**
  * Update 'instance' state
  * @param {Time} instance
  * @returns {Time}
  */
-
-
 function update(instance) {
   instance.isValid = isValid(instance._date);
   instance.timeString = instance.toString();
@@ -809,6 +851,7 @@ function normalizeUnit(unit) {
       return 's';
     case 'millisecond':
     case 'milliseconds':
+    case 'ms':
     case 'S':
       return 'S';
   }
