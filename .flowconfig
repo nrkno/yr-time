@@ -1,0 +1,8 @@
+[ignore]
+  .*/broken.json
+[include]
+  ./src/index.js
+[libs]
+
+[options]
+  munge_underscores=true

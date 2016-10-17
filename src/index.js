@@ -6,7 +6,7 @@
  * @copyright Yr
  * @license MIT
  */
-
+//@flow
 const isPlainObject = require('is-plain-obj');
 
 const DEFAULT_DATE = 'Invalid Date';
@@ -39,7 +39,8 @@ const FLAGS_START_OF = {
   D: FLAGS.S | FLAGS.s | FLAGS.m | FLAGS.H,
   H: FLAGS.S | FLAGS.s | FLAGS.m,
   m: FLAGS.S | FLAGS.s,
-  s: FLAGS.S
+  s: FLAGS.S,
+  S : 0
 };
 // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
 const RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
@@ -49,6 +50,8 @@ const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
 let nightStartsAt = DEFAULT_NIGHT_STARTS_AT;
 let parseKeys = DEFAULT_PARSE_KEYS;
+
+type TimeOptions = {dayStartsAt?: number, nightStartsAt?: number, parseKeys?: string[]}
 
 module.exports = {
   isTime,
@@ -60,7 +63,7 @@ module.exports = {
    *  - {Number} nightStartsAt
    *  - {Array} parseKeys
    */
-  init (options = {}) {
+  init (options: TimeOptions = {}) {
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
     nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
     parseKeys = options.parseKeys || DEFAULT_PARSE_KEYS;
@@ -71,7 +74,7 @@ module.exports = {
    * @param {String} timeString
    * @returns {Time}
    */
-  create (timeString) {
+  create (timeString: string) : Time {
     // Return if passed Time instance
     if (timeString && 'string' != typeof timeString && isTime(timeString)) return timeString;
     return new Time(timeString);
@@ -90,7 +93,7 @@ module.exports = {
    * @param {Object} obj
    * @returns {Object}
    */
-  parse (obj) {
+  parse (obj: Object) {
     function parseValue (value) {
       if (Array.isArray(value)) {
         return value.map((value) => {
@@ -120,7 +123,23 @@ module.exports = {
   }
 };
 
+type Locale = { "daysShort":  string[],
+                "days": string[],
+                "format": { "LT" : string, "LTS" : string, "L" : string, "LL" : string, "LLL" : string, "LLLL" : string },
+                "monthsShort": string[],
+                "months": [],
+                "today": string,
+                "tomorrow": string,
+                "tonight": string
+              }
+
 class Time {
+  _date: Date;
+  _locale: ?Locale; 
+  _offset: number;
+  _offsetString: string;
+  isValid : boolean;
+  timeString : string;
   /**
    * Constructor
    * @param {String} timeString
@@ -129,7 +148,7 @@ class Time {
     // Return if timeString not a string
     if (timeString && 'string' != typeof timeString) return timeString;
 
-    this._date = DEFAULT_DATE;
+    //this._date = DEFAULT_DATE;
     this._locale = null;
     this._offset = 0;
     this._offsetString = DEFAULT_OFFSET;
@@ -323,6 +342,11 @@ class Time {
    */
   month (value) {
     if (value != null) return this._set(value, 'setUTCMonth');
+    return this.month();
+  }
+  
+  month() 
+  {
     return this._date.getUTCMonth();
   }
 
@@ -344,10 +368,14 @@ class Time {
    * @returns {Number|Time}
    */
   day (value) {
-    const day = this._date.getUTCDay();
+    const day = this.day();
 
     if (value != null) return this._set(this.date() + value - day, 'setUTCDate');
     return day;
+  }
+  
+  day() {
+    return this._date.getUTCDay();
   }
 
   /**
@@ -358,6 +386,10 @@ class Time {
    */
   hour (value) {
     if (value != null) return this._set(value, 'setUTCHours');
+    return this.hour();
+  }
+
+  hour() {
     return this._date.getUTCHours();
   }
 
@@ -391,7 +423,11 @@ class Time {
    */
   millisecond (value) {
     if (value != null) return this._set(value, 'setUTCMilliseconds');
-    return this._date.getUTCMilliseconds();
+    return this.millisecond();
+  }
+
+  millisecond () {
+    return this._date.getUTCMilliseconds()
   }
 
   /**
@@ -641,7 +677,7 @@ class Time {
    */
   _set (value, method) {
     let instance = this.clone();
-    let d = instance._date;
+    let d:Object = instance._date; // Stupid
 
     d[method](value);
     return update(instance);
@@ -832,7 +868,7 @@ function normalizeUnit (unit) {
  * @param {Date} date
  * @returns {Boolean}
  */
-function isValid (date) {
+function isValid (date: Date) {
   return Object.prototype.toString.call(date) == '[object Date]'
     && !isNaN(date.getTime());
 }
@@ -842,7 +878,7 @@ function isValid (date) {
  * @param {Time} time
  * @returns {Boolean}
  */
-function isTime (time) {
+function isTime (time : Time) {
   return time != null && time._manipulate != null && time._date != null;
 }
 
@@ -851,7 +887,7 @@ function isTime (time) {
  * @param {Number} value
  * @returns {Number}
  */
-function round (value) {
+function round (value: number) {
   if (value < 0) return Math.ceil(value);
   return Math.floor(value);
 }
