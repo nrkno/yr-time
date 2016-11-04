@@ -22,6 +22,7 @@
   "scripts": {
     "prepublish": "buddy build",
     "test": "NODE_ENV=test mocha test/lib-test.js --reporter spec",
+    "test-windows": "SET NODE_ENV=test&&mocha test/lib-test.js --reporter spec",
     "test-client": "buddy build && mocha-phantomjs test/test-runner.html"
   },
   "browser": "index.js",
