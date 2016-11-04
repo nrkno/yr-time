@@ -51,7 +51,7 @@ module.exports = {
    *  - {Array} parseKeys
    */
   init: function init() {
-    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
     nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
