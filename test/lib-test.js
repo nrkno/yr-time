@@ -637,7 +637,7 @@ describe('time', function () {
         expect(time.create('2016-01-01T00:00:00.300').format('SS')).to.equal('30');
         expect(time.create('2016-01-01T00:00:00.900').format('SSS')).to.equal('900');
       });
-      it('should handle timezone masks', function () {
+      it('should handle offset masks', function () {
         expect(time.create('2016-01-01T00:00:00+02:00').format('ZZ')).to.equal('+02:00');
       });
       it('should handle masks when missing locale', function () {

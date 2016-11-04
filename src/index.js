@@ -169,7 +169,7 @@ class Time {
   }
 
   /**
-   * Modify TimeZone offset with new 'value' in minutes
+   * Modify Offset with new 'value' in minutes
    * @param {Number} value
    * @returns {Time}
    */

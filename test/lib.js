@@ -294,7 +294,7 @@ _m_['src/index.js']=(function(module,exports){
     }
   
     /**
-     * Modify TimeZone offset with new 'value' in minutes
+     * Modify Offset with new 'value' in minutes
      * @param {Number} value
      * @returns {Time}
      */
