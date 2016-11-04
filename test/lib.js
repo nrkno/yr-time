@@ -7,7 +7,7 @@ if (self.require == null) {
   self.require = function require (id) {
     if (_m_[id]) return (_m_[id].boot) ? _m_[id]() : _m_[id];
 
-    if (process.env.NODE_ENV == 'development') {
+    if ('test' == 'development') {
       console.warn('module ' + id + ' not found');
     }
   };
@@ -366,8 +366,8 @@ _m_['src/index.js']=(function(module,exports){
           t1 = t1.startOf('D');
           t2 = t2.startOf('D');
         }
-  
-        var delta = t1._date - t2._date;
+        var offsetDelta = 60000 * (t1._offset - t2._offset);
+        var delta = t1._date - t2._date + offsetDelta;
   
         switch (unit) {
           case 'D':
@@ -747,7 +747,10 @@ _m_['src/index.js']=(function(module,exports){
   
   
     Time.prototype.now = function now() {
-      return new Time().offset(this._offset);
+      var instance = new Time().offset(this._offset);
+  
+      instance._locale = this._locale;
+      return instance;
     };
   
     /**

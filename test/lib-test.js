@@ -506,6 +506,9 @@ describe('time', function () {
         expect(time.create('2016-01-04T05:59:00').diff(time.create('2016-01-01T06:01:00'), 'D', false)).to.equal(2);
         time.init();
       });
+      it('should handle values with different offsets', function () {
+        expect(time.create('2016-10-30T02:00:00+02:00').diff(time.create('2016-10-30T02:00:00+01:00'), 'H', true)).to.equal(1);
+      });
     });
 
     describe('isSame()', function () {

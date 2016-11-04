@@ -236,8 +236,8 @@ var Time = function () {
         t1 = t1.startOf('D');
         t2 = t2.startOf('D');
       }
-
-      var delta = t1._date - t2._date;
+      var offsetDelta = 60000 * (t1._offset - t2._offset);
+      var delta = t1._date - t2._date + offsetDelta;
 
       switch (unit) {
         case 'D':
@@ -617,7 +617,10 @@ var Time = function () {
 
 
   Time.prototype.now = function now() {
-    return new Time().offset(this._offset);
+    var instance = new Time().offset(this._offset);
+
+    instance._locale = this._locale;
+    return instance;
   };
 
   /**

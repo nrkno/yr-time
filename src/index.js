@@ -223,7 +223,7 @@ class Time {
     let diff = 0;
     let t1 = this;
     let t2 = time;
-
+    
     if (unit == 'Y' || unit == 'M') {
       diff = t1._monthDiff(t2);
       if (unit == 'Y') diff /= 12;
@@ -233,8 +233,8 @@ class Time {
         t1 = t1.startOf('D');
         t2 = t2.startOf('D');
       }
-
-      const delta = t1._date - t2._date;
+      const offsetDelta = 60000 * (t1._offset - t2._offset);
+      const delta = t1._date - t2._date + offsetDelta;
 
       switch (unit) {
         case 'D':
