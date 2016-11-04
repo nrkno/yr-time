@@ -5,10 +5,10 @@ var en, expect, nb, time;
 // Make it work in browser
 try {
   // if (err) console.log(err);
-  en = require('test/src.js').en;
+  en = require('src/index-locales').en;
   expect = window.expect;
-  nb = require('test/src.js').nb;
-  time = require('test/src.js').time;
+  nb = require('src/index-locales').nb;
+  time = require('src/index-locales').time;
 // .. or Node
 } catch (err) {
   en = require('../locale/en');

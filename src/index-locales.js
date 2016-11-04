@@ -3,5 +3,6 @@
 module.exports = {
   en: require('../locale/en.json'),
   nb: require('../locale/nb.json'),
-  time: require('../src/index')
+  nn: require('../locale/nn.json'),
+  time: require('./index')
 };
