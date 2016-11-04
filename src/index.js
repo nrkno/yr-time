@@ -457,21 +457,22 @@ class Time {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
+    const time1 = this.utc();
+    const time2 = time.utc();
+    if (!unit || unit == 'S') return +time1._date < +time2._date;
 
-    if (!unit || unit == 'S') return +this._date < +time._date;
-
-    const Y1 = this.year();
-    const Y2 = time.year();
-    const M1 = this.month();
-    const M2 = time.month();
-    const D1 = this.date();
-    const D2 = time.date();
-    const H1 = this.hour();
-    const H2 = time.hour();
-    const m1 = this.minute();
-    const m2 = time.minute();
-    const s1 = this.second();
-    const s2 = time.second();
+    const Y1 = time1.year();
+    const Y2 = time2.year();
+    const M1 = time1.month();
+    const M2 = time2.month();
+    const D1 = time1.date();
+    const D2 = time2.date();
+    const H1 = time1.hour();
+    const H2 = time2.hour();
+    const m1 = time1.minute();
+    const m2 = time2.minute();
+    const s1 = time1.second();
+    const s2 = time2.second();
     let test = false;
 
     test = Y1 > Y2;

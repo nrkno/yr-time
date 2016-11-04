@@ -589,6 +589,15 @@ describe('time', function () {
         expect(time.create('2016-01-01T01:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
         expect(time.create('2016-01-01T00:01:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
       });
+      it('should return "true" for offsets', function() {
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'm')).to.equal(true);
+      });
+      it('should return "false" for too small offsets', function() {
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'M')).to.equal(false);
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'D')).to.equal(false);
+      });
+
     });
 
     describe('format()', function () {
