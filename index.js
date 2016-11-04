@@ -164,7 +164,7 @@ var Time = function () {
   }
 
   /**
-   * Modify TimeZone offset with new 'value' in minutes
+   * Modify Offset with new 'value' in minutes
    * @param {Number} value
    * @returns {Time}
    */
@@ -236,8 +236,8 @@ var Time = function () {
         t1 = t1.startOf('D');
         t2 = t2.startOf('D');
       }
-
-      var delta = t1._date - t2._date;
+      var offsetDelta = 60000 * (t1._offset - t2._offset);
+      var delta = t1._date - t2._date + offsetDelta;
 
       switch (unit) {
         case 'D':

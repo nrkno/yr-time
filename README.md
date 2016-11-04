@@ -21,7 +21,7 @@ console.log(t); //=> 2015-12-31 02:00
   - **nightStartsAt**: the hour night begins (default `18`). Modifies results of `format()` when using `ddr` or `dddr` masks
   - **parseKeys**: the property keys to parse during `time.parse()` (default `['created', 'end', 'from', 'rise', 'set', 'start', 'times', 'to', 'update']`)
 
-**create(_timeString_)**: create a `Time` instance with `timeString`. The following patterns are valid, with or without timezone offset (`+HH:mm`):
+**create(_timeString_)**: create a `Time` instance with `timeString`. The following patterns are valid, with or without offset (`+HH:mm`):
 - `YYYY`: `time.create('2016')` => `2016-01-01T00:00:00.000+00:00`
 - `YYYY-MM`: `time.create('2016-02')` => `2016-02-01T00:00:00.000+00:00`
 - `YYYY-MM-DD`: `time.create('2016-02-02')` => `2016-02-02T00:00:00.000+00:00`
@@ -30,7 +30,7 @@ console.log(t); //=> 2015-12-31 02:00
 - `YYYY-MM-DDTHH:mm:ss`: `time.create('2016-02-02T12:30:30')` => `2016-02-02T12:30:30.000+00:00`
 - `YYYY-MM-DDTHH:mm:ss.SSS`: `time.create('2016-02-02T12:30:30.500')` => `2016-02-02T12:30:30.500+00:00`
 
-If no timezone offset is specified, the time instance is handled as UTC (`+00:00`).
+If no offset is specified, the time instance is handled as UTC (`+00:00`).
 
 If `timeString` is omitted altogether, an instance is created with time set to current machine time and timezone offset. 
 
@@ -42,7 +42,7 @@ If `timeString` is omitted altogether, an instance is created with time set to c
 
 ### Time instances
 
-**offset(_value)**: update an instance's TimeZone offset with `value` (in minutes).  Returns a new `Time` instance.
+**offset(_value)**: update an instance's Offset with `value` (in minutes).  Returns a new `Time` instance.
 
 **add(_value_, _unit_)**: add specified `value` in specified `unit` to the instance. Returns a new `Time` instance:
 
@@ -151,7 +151,7 @@ time.create('2016-12-31')
 | __Fractional second__ | S       | 0 1 ... 8 9                            |
 |                       | SS      | 0 1 ... 98 99                          |
 |                       | SSS     | 0 1 ... 998 999                        |
-| __Timezone__          | ZZ      | -07:00 -06:00 ... +06:00 +07:00        |
+| __Offset__            | ZZ      | -07:00 -06:00 ... +06:00 +07:00        |
 \* requires locale
 \*\* relative day based on `daysFromNow`
 

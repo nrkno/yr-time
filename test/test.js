@@ -506,6 +506,9 @@ describe('time', function () {
         expect(time.create('2016-01-04T05:59:00').diff(time.create('2016-01-01T06:01:00'), 'D', false)).to.equal(2);
         time.init();
       });
+      it('should handle values with different offsets', function () {
+        expect(time.create('2016-10-30T02:00:00+02:00').diff(time.create('2016-10-30T02:00:00+01:00'), 'H', true)).to.equal(1);
+      });
     });
 
     describe('isSame()', function () {
@@ -586,6 +589,15 @@ describe('time', function () {
         expect(time.create('2016-01-01T01:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
         expect(time.create('2016-01-01T00:01:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
       });
+      it('should return "true" for offsets', function() {
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'm')).to.equal(true);
+      });
+      it('should return "false" for too small offsets', function() {
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'M')).to.equal(false);
+        expect(time.create('2016-01-01T00:00:00+01:00').isBefore(time.create('2016-01-01T00:00:00+02:00'), 'D')).to.equal(false);
+      });
+
     });
 
     describe('format()', function () {
@@ -634,7 +646,7 @@ describe('time', function () {
         expect(time.create('2016-01-01T00:00:00.300').format('SS')).to.equal('30');
         expect(time.create('2016-01-01T00:00:00.900').format('SSS')).to.equal('900');
       });
-      it('should handle timezone masks', function () {
+      it('should handle offset masks', function () {
         expect(time.create('2016-01-01T00:00:00+02:00').format('ZZ')).to.equal('+02:00');
       });
       it('should handle masks when missing locale', function () {
