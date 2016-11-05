@@ -233,12 +233,12 @@ class Time {
         t1 = t1.startOf('D');
         t2 = t2.startOf('D');
       }
-      const offsetDelta = 60000 * (t1._offset - t2._offset);
-      const delta = t1._date - t2._date + offsetDelta;
+      const delta = t1 - t2;
 
       switch (unit) {
         case 'D':
-          diff = delta / 864e5;
+          const offsetDelta = 6e4 * (t1._offset - t2._offset);
+          diff = (delta + offsetDelta) / 864e5;
           break;
         case 'H':
           diff = delta / 36e5;
@@ -756,7 +756,7 @@ class Time {
    */
   valueOf () {
     if (!this.isValid) return NaN;
-    return +this._date;
+    return +this._date - ((this._offset || 0) * 6e4);
   }
 }
 

@@ -92,18 +92,24 @@ describe('time', function () {
     });
 
     describe('valueOf()', function () {
-      it('should return milliseconds UTC', function () {
-        var tz = (new Date()).getTimezoneOffset() * -1;
-        var t1 = time.create(); // Local
-        var t2 = t1.subtract(tz, 'm'); // Local to UTCish
-        var t3 = time.create((new Date()).toISOString()); // UTC
-        var tzDiff = Math.abs(tz) * 6e4;
+      it('should return milliseconds in UTC', function () {
+        var offsetLocal = (new Date()).getTimezoneOffset() * -1;
+        var tLocal = time.create(); // Local
+        var tSansOffset = tLocal.subtract(offsetLocal, 'm'); // UTC sans offset
+        var tUTC = time.create((new Date()).toISOString()); // UTC
 
-        expect(+t1 - +t2).to.be.within((36e5 * (tz / 60)) - 20, (36e5 * (tz / 60)) + 20);
-        expect(+t1 - +t3).to.be.within(tzDiff - 20, tzDiff + 20);
-        expect(+t2 - +t3).to.be.within(-20, 20);
-        expect(+t3 - Date.now()).to.be.within(-20, 20);
+        expect(+tLocal - +tSansOffset).to.be.within(offsetLocal * 6e4  - 20, offsetLocal * 6e4 + 20);
+        expect(+tLocal - +tUTC).to.be.within(-20, 20);
+        expect(+tSansOffset - +tUTC).to.be.within(-offsetLocal * 6e4  - 20, offsetLocal * 6e4 + 20);
+        expect(+tUTC - Date.now()).to.be.within(-20, 20);
       });
+
+      it('same date with different offset should not be equal', function() {
+        var t1 = time.create('2016-01-01T00:00:00-01:30');
+        var t2 = time.create('2016-01-01T00:00:00-00:30');
+        expect(+t1).to.not.be.equal(+t2);
+      });
+
     });
 
     describe('getters', function () {
@@ -507,7 +513,12 @@ describe('time', function () {
         time.init();
       });
       it('should handle values with different offsets', function () {
-        expect(time.create('2016-10-30T02:00:00+02:00').diff(time.create('2016-10-30T02:00:00+01:00'), 'H', true)).to.equal(1);
+        expect(time.create('2016-10-30T02:00:00+01:00').diff(time.create('2016-10-30T02:00:00+02:00'), 'H', true)).to.equal(1);
+      });
+      it('should ignore offsets when comparing units > hours', function () {
+        expect(time.create('2016-10-31T00:00:00+01:00').diff(time.create('2016-10-30T23:00:00+02:00'), 'D', false)).to.equal(1);
+        expect(time.create('2016-10-31T00:00:00+01:00').diff(time.create('2016-10-30T12:00:00+02:00'), 'D', true)).to.equal(0.5);
+        expect(time.create('2016-10-31T23:00:00+01:00').diff(time.create('2016-11-01T:00:00+02:00'), 'M', true)).not.to.equal(0.0);
       });
     });
 
@@ -749,9 +760,8 @@ describe('time', function () {
     it('should return an instance for current time in UTC', function () {
       var t = time.now();
       var d = Date.now();
-      var tzDiff = Math.abs((new Date()).getTimezoneOffset()) * 6e4;
 
-      expect(+time.create() - +t).to.be.within(tzDiff - 20, tzDiff + 20);
+      expect(+time.create() - +t).to.be.within(-20, 20);
       expect(d - +t).to.be.within(0, 2);
       expect(t._offset).to.equal(0);
     });
