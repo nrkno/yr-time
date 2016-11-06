@@ -303,6 +303,20 @@ class Time {
 
     return this;
   }
+  
+  /**
+   * Reset to end of 'unit'
+   * Returns new instance
+   * @param {String} unit
+   * @returns {Time}
+   */
+  endOf (unit) {
+    unit = normalizeUnit(unit === undefined ? 'S' : unit);
+    if (unit === 'S') {
+        return this;
+    }
+    return this.startOf(unit).add(1, unit).subtract(1, 'S');
+   }
 
   /**
    * Get/set full year
@@ -448,7 +462,7 @@ class Time {
   }
 
   /**
-   * Compare 'time', limited by 'unit', and determine if is before
+   * Compare 'time', limited by 'unit', and determine if 'time' is before this
    * @param {Time} time
    * @param {String} [unit]
    * @returns {Boolean}
@@ -457,37 +471,8 @@ class Time {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
-    const time1 = this.utc();
-    const time2 = time.utc();
-    if (!unit || unit == 'S') return +time1._date < +time2._date;
-
-    const Y1 = time1.year();
-    const Y2 = time2.year();
-    const M1 = time1.month();
-    const M2 = time2.month();
-    const D1 = time1.date();
-    const D2 = time2.date();
-    const H1 = time1.hour();
-    const H2 = time2.hour();
-    const m1 = time1.minute();
-    const m2 = time2.minute();
-    const s1 = time1.second();
-    const s2 = time2.second();
-    let test = false;
-
-    test = Y1 > Y2;
-    if (unit == 'Y') return test;
-    test = test || Y1 == Y2 && M1 > M2;
-    if (unit == 'M') return test;
-    test = test || M1 == M2 && D1 > D2;
-    if (unit == 'D') return test;
-    test = test || D1 == D2 && H1 > H2;
-    if (unit == 'H') return test;
-    test = test || H1 == H2 && m1 > m2;
-    if (unit == 'm') return test;
-    test = test || m1 == m2 && s1 > s2;
-
-    return test;
+    const tLimited = unit == 'S' ? time : time.clone().endOf(unit);  
+    return tLimited.valueOf() < this.valueOf();
   }
 
   /**

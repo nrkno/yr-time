@@ -446,6 +446,21 @@ describe('time', function () {
           time.init();
         });
       });
+      describe('endOf()', function () {
+        const tMs = time.create('2016-01-01T01:00:01.123+01:21');
+        it('should passthrough if ms is unit', function () {
+          expect(tMs.endOf('S')).to.equal(tMs);
+          expect(tMs.endOf()).to.equal(tMs);
+        });
+        it('should round off to end of unit', function () {
+          expect((tMs.endOf('s')).timeString).to.equal('2016-01-01T01:00:01.999+01:21');
+          expect((tMs.endOf('m')).timeString).to.equal('2016-01-01T01:00:59.999+01:21');
+          expect((tMs.endOf('H')).timeString).to.equal('2016-01-01T01:59:59.999+01:21');
+          expect((tMs.endOf('D')).timeString).to.equal('2016-01-01T23:59:59.999+01:21');
+          expect((tMs.endOf('M')).timeString).to.equal('2016-01-31T23:59:59.999+01:21');
+          expect((tMs.endOf('Y')).timeString).to.equal('2016-12-31T23:59:59.999+01:21');
+        });
+      });
     });
 
     describe('diff()', function () {
