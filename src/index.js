@@ -312,9 +312,7 @@ class Time {
    */
   endOf (unit) {
     unit = normalizeUnit(unit === undefined ? 'S' : unit);
-    if (unit === 'S') {
-        return this;
-    }
+    if (unit === 'S')  return this.clone();
     return this.startOf(unit).add(1, unit).subtract(1, 'S');
    }
 
@@ -462,7 +460,7 @@ class Time {
   }
 
   /**
-   * Compare 'time', limited by 'unit', and determine if 'time' is before this
+   * Compare this, limited by 'unit', and determine if this is before 'time'
    * @param {Time} time
    * @param {String} [unit]
    * @returns {Boolean}
@@ -471,8 +469,8 @@ class Time {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
-    const tLimited = unit == 'S' ? time : time.clone().endOf(unit);  
-    return tLimited.valueOf() < this.valueOf();
+    const tLimited = unit == 'S' ? this : this.endOf(unit);  
+    return tLimited.valueOf() < time.valueOf();
   }
 
   /**
