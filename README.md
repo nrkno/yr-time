@@ -36,8 +36,6 @@ If `timeString` is omitted altogether, an instance is created with time set to c
 
 **now()**: create a `Time` instance based on number of milliseconds elapsed since 1 January 1970 00:00:00 UTC (`Date.now() == Time.now().toValue()`)
 
-**parse(_obj_)**: recursively parse all time strings found in `obj` into `Time` instances. Uses the whitelist of `parseKeys` property names set via `init()`. **Note**: properties are mutated in place.
-
 **isTime(_time_)**: determine if `time` is a `Time` instance.
 
 ### Time instances
@@ -93,6 +91,13 @@ time.create('2016-12-01')
   .startOf('year'); //=> 2016-01-01T00:00:00.000+00:00
 ```
 
+**endOf(_unit_)**: reset to end of specified `unit`. Returns a new `Time` instance:
+
+```js
+time.create('2016-12-01')
+  .endOf('year'); //=> 2016-12-31T23:59:59.999+00:00
+```
+
 **year(_value_)**: get/set year unit. If passed a `value`, returns a new `Time` instance.
 
 **month(_value_)**: get/set month unit (`0-11`). If passed a `value`, returns a new `Time` instance.
@@ -116,11 +121,11 @@ time.create('2016-12-01')
   .isSame(time.create('2016-12-31'), 'month'); //=> true
 ```
 
-**isBefore(_time_, _unit_)**: determine if `time` comes before when evaluated in specified `unit`:
+**isBefore(_time_, _unit_)**: determine if Time instance comes before `time` when evaluated in specified `unit`:
 
 ```js
 time.create('2016-12-31')
-  .isBefore(time.create('2016-12-30'), 'day'); //=> true
+  .isBefore(time.create('2017-1-1'), 'day'); //=> true
 ```
 
 **locale(_locale_)**: set locale for this instance. Returns a new `Time` instance. See [en.json](https://github.com/YR/date/blob/master/locale/en.json) for an example of expected properties.
