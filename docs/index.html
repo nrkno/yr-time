@@ -17198,17 +17198,6 @@ var require = self.require || function require (id) {
 };
 
 (function () {
-/*== node_modules/is-plain-obj/index.js ==*/
-$m['is-plain-obj'] = { exports: {} };
-
-var isplainobj__toString = Object.prototype.toString;
-
-$m['is-plain-obj'].exports = function (x) {
-	var prototype;
-	return isplainobj__toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
-};
-/*≠≠ node_modules/is-plain-obj/index.js ≠≠*/
-
 /*== src/index.js ==*/
 $m['src/index'] = { exports: {} };
 
@@ -17219,13 +17208,10 @@ $m['src/index'] = { exports: {} };
  * @license MIT
  */
 
-const srcindex__isPlainObject = $m['is-plain-obj'].exports;
-
 const srcindex__DEFAULT_DATE = 'Invalid Date';
 const srcindex__DEFAULT_DAY_STARTS_AT = 0;
 const srcindex__DEFAULT_NIGHT_STARTS_AT = 18;
 const srcindex__DEFAULT_OFFSET = '+00:00';
-const srcindex__DEFAULT_PARSE_KEYS = ['created', 'end', 'from', 'rise', 'set', 'start', 'times', 'to', 'update'];
 const srcindex__FLAGS = {
   Y: 1,
   M: 2,
@@ -17250,7 +17236,6 @@ const srcindex__RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 const srcindex__RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let srcindex__dayStartsAt = srcindex__DEFAULT_DAY_STARTS_AT;
 let srcindex__nightStartsAt = srcindex__DEFAULT_NIGHT_STARTS_AT;
-let srcindex__parseKeys = srcindex__DEFAULT_PARSE_KEYS;
 
 $m['src/index'].exports = {
   isTime: srcindex__isTime,
@@ -17265,7 +17250,6 @@ $m['src/index'].exports = {
   init(options = {}) {
     srcindex__dayStartsAt = options.dayStartsAt || srcindex__DEFAULT_DAY_STARTS_AT;
     srcindex__nightStartsAt = options.nightStartsAt || srcindex__DEFAULT_NIGHT_STARTS_AT;
-    srcindex__parseKeys = options.parseKeys || srcindex__DEFAULT_PARSE_KEYS;
   },
 
   /**
@@ -17285,38 +17269,6 @@ $m['src/index'].exports = {
    */
   now() {
     return this.create().utc();
-  },
-
-  /**
-   * Parse time strings into Time instances
-   * @param {Object} obj
-   * @returns {Object}
-   */
-  parse(obj) {
-    function parseValue(value) {
-      if (Array.isArray(value)) {
-        return value.map(value => {
-          return 'string' == typeof value ? new Time(value) : traverse(value);
-        });
-      } else if ('string' == typeof value) {
-        return new Time(value);
-      }
-      return value;
-    }
-
-    function traverse(o) {
-      // Abort if not object or array
-      if (!(Array.isArray(o) || srcindex__isPlainObject(o))) return o;
-
-      for (const prop in o) {
-        // Only parse whitelisted keys
-        o[prop] = ~srcindex__parseKeys.indexOf(prop) ? parseValue(o[prop]) : traverse(o[prop]);
-      }
-
-      return o;
-    }
-
-    return traverse(obj);
   }
 };
 
@@ -17369,7 +17321,7 @@ class Time {
   }
 
   /**
-   * Modify TimeZone offset with new 'value' in minutes
+   * Modify Offset with new 'value' in minutes
    * @param {Number} value
    * @returns {Time}
    */
@@ -17433,12 +17385,13 @@ class Time {
         t1 = t1.startOf('D');
         t2 = t2.startOf('D');
       }
-
-      const delta = t1._date - t2._date;
+      const delta = t1 - t2;
 
       switch (unit) {
         case 'D':
-          diff = delta / 864e5;
+          const offsetDelta = 6e4 * (t1._offset - t2._offset);
+
+          diff = (delta + offsetDelta) / 864e5;
           break;
         case 'H':
           diff = delta / 36e5;
@@ -17502,6 +17455,18 @@ class Time {
     }
 
     return this;
+  }
+
+  /**
+   * Reset to end of 'unit'
+   * Returns new instance
+   * @param {String} unit
+   * @returns {Time}
+   */
+  endOf(unit) {
+    unit = srcindex__normalizeUnit(unit === undefined ? 'S' : unit);
+    if (unit === 'S') return this.clone();
+    return this.startOf(unit).add(1, unit).subtract(1, 'S');
   }
 
   /**
@@ -17633,7 +17598,7 @@ class Time {
   }
 
   /**
-   * Compare 'time', limited by 'unit', and determine if is before
+   * Compare this, limited by 'unit', and determine if this is before 'time'
    * @param {Time} time
    * @param {String} [unit]
    * @returns {Boolean}
@@ -17642,36 +17607,9 @@ class Time {
     if (!this.isValid || !time.isValid) return false;
 
     unit = srcindex__normalizeUnit(unit);
+    const tLimited = unit == 'S' ? this : this.endOf(unit);
 
-    if (!unit || unit == 'S') return +this._date < +time._date;
-
-    const Y1 = this.year();
-    const Y2 = time.year();
-    const M1 = this.month();
-    const M2 = time.month();
-    const D1 = this.date();
-    const D2 = time.date();
-    const H1 = this.hour();
-    const H2 = time.hour();
-    const m1 = this.minute();
-    const m2 = time.minute();
-    const s1 = this.second();
-    const s2 = time.second();
-    let test = false;
-
-    test = Y1 > Y2;
-    if (unit == 'Y') return test;
-    test = test || Y1 == Y2 && M1 > M2;
-    if (unit == 'M') return test;
-    test = test || M1 == M2 && D1 > D2;
-    if (unit == 'D') return test;
-    test = test || D1 == D2 && H1 > H2;
-    if (unit == 'H') return test;
-    test = test || H1 == H2 && m1 > m2;
-    if (unit == 'm') return test;
-    test = test || m1 == m2 && s1 > s2;
-
-    return test;
+    return tLimited.valueOf() < time.valueOf();
   }
 
   /**
@@ -17934,7 +17872,7 @@ class Time {
    */
   valueOf() {
     if (!this.isValid) return NaN;
-    return +this._date;
+    return +this._date - (this._offset || 0) * 6e4;
   }
 }
 
@@ -18345,18 +18283,24 @@ describe('time', function () {
     });
 
     describe('valueOf()', function () {
-      it('should return milliseconds UTC', function () {
-        var tz = (new Date()).getTimezoneOffset() * -1;
-        var t1 = time.create(); // Local
-        var t2 = t1.subtract(tz, 'm'); // Local to UTCish
-        var t3 = time.create((new Date()).toISOString()); // UTC
-        var tzDiff = Math.abs(tz) * 6e4;
+      it('should return milliseconds in UTC', function () {
+        var offsetLocal = (new Date()).getTimezoneOffset() * -1;
+        var tLocal = time.create(); // Local
+        var tSansOffset = tLocal.subtract(offsetLocal, 'm'); // UTC sans offset
+        var tUTC = time.create((new Date()).toISOString()); // UTC
 
-        expect(+t1 - +t2).to.be.within((36e5 * (tz / 60)) - 20, (36e5 * (tz / 60)) + 20);
-        expect(+t1 - +t3).to.be.within(tzDiff - 20, tzDiff + 20);
-        expect(+t2 - +t3).to.be.within(-20, 20);
-        expect(+t3 - Date.now()).to.be.within(-20, 20);
+        expect(+tLocal - +tSansOffset).to.be.within(offsetLocal * 6e4  - 20, offsetLocal * 6e4 + 20);
+        expect(+tLocal - +tUTC).to.be.within(-20, 20);
+        expect(+tSansOffset - +tUTC).to.be.within(-offsetLocal * 6e4  - 20, offsetLocal * 6e4 + 20);
+        expect(+tUTC - Date.now()).to.be.within(-20, 20);
       });
+
+      it('same date with different offset should not be equal', function() {
+        var t1 = time.create('2016-01-01T00:00:00-01:30');
+        var t2 = time.create('2016-01-01T00:00:00-00:30');
+        expect(+t1).to.not.be.equal(+t2);
+      });
+
     });
 
     describe('getters', function () {
@@ -18693,6 +18637,21 @@ describe('time', function () {
           time.init();
         });
       });
+      describe('endOf()', function () {
+        const tMs = time.create('2016-01-01T01:00:01.123+01:21');
+        it('should passthrough if ms is unit', function () {
+          expect(tMs.endOf('S').timeString).to.equal(tMs.timeString);
+          expect(tMs.endOf().timeString).to.equal(tMs.timeString);
+        });
+        it('should round off to end of unit', function () {
+          expect((tMs.endOf('s')).timeString).to.equal('2016-01-01T01:00:01.999+01:21');
+          expect((tMs.endOf('m')).timeString).to.equal('2016-01-01T01:00:59.999+01:21');
+          expect((tMs.endOf('H')).timeString).to.equal('2016-01-01T01:59:59.999+01:21');
+          expect((tMs.endOf('D')).timeString).to.equal('2016-01-01T23:59:59.999+01:21');
+          expect((tMs.endOf('M')).timeString).to.equal('2016-01-31T23:59:59.999+01:21');
+          expect((tMs.endOf('Y')).timeString).to.equal('2016-12-31T23:59:59.999+01:21');
+        });
+      });
     });
 
     describe('diff()', function () {
@@ -18759,6 +18718,14 @@ describe('time', function () {
         expect(time.create('2016-01-04T05:59:00').diff(time.create('2016-01-01T06:01:00'), 'D', false)).to.equal(2);
         time.init();
       });
+      it('should handle values with different offsets', function () {
+        expect(time.create('2016-10-30T02:00:00+01:00').diff(time.create('2016-10-30T02:00:00+02:00'), 'H', true)).to.equal(1);
+      });
+      it('should ignore offsets when comparing units > hours', function () {
+        expect(time.create('2016-10-31T00:00:00+01:00').diff(time.create('2016-10-30T23:00:00+02:00'), 'D', false)).to.equal(1);
+        expect(time.create('2016-10-31T00:00:00+01:00').diff(time.create('2016-10-30T12:00:00+02:00'), 'D', true)).to.equal(0.5);
+        expect(time.create('2016-10-31T23:00:00+01:00').diff(time.create('2016-11-01T:00:00+02:00'), 'M', true)).not.to.equal(0.0);
+      });
     });
 
     describe('isSame()', function () {
@@ -18815,30 +18782,39 @@ describe('time', function () {
         expect(t.isBefore(t.clone())).to.equal(false);
       });
       it('should return "true" for year', function () {
-        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2015-01-01T00:00:00'), 'Y')).to.equal(true);
+        expect(time.create('2015-01-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'Y')).to.equal(true);
       });
       it('should return "true" for month', function () {
-        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2015-01-01T00:00:00'), 'M')).to.equal(true);
-        expect(time.create('2016-02-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'M')).to.equal(true);
+        expect(time.create('2015-01-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'M')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-02-01T00:00:00'), 'M')).to.equal(true);
       });
       it('should return "true" for day', function () {
-        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2015-01-01T00:00:00'), 'D')).to.equal(true);
-        expect(time.create('2016-02-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'D')).to.equal(true);
-        expect(time.create('2016-01-02T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'D')).to.equal(true);
+        expect(time.create('2015-01-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-02-01T00:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-01-02T00:00:00'), 'D')).to.equal(true);
       });
       it('should return "true" for hour', function () {
-        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2015-01-01T00:00:00'), 'H')).to.equal(true);
-        expect(time.create('2016-02-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'H')).to.equal(true);
-        expect(time.create('2016-01-02T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'H')).to.equal(true);
-        expect(time.create('2016-01-01T01:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'H')).to.equal(true);
+        expect(time.create('2015-01-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-02-01T00:00:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-01-02T00:00:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-01-01T01:00:00'), 'H')).to.equal(true);
       });
       it('should return "true" for minute', function () {
-        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2015-01-01T00:00:00'), 'm')).to.equal(true);
-        expect(time.create('2016-02-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
-        expect(time.create('2016-01-02T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
-        expect(time.create('2016-01-01T01:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
-        expect(time.create('2016-01-01T00:01:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2015-01-01T00:00:00').isBefore(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-02-01T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-01-02T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-01-01T01:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00').isBefore(time.create('2016-01-01T00:01:00'), 'm')).to.equal(true);
       });
+      it('should return "true" for offsets', function() {
+        expect(time.create('2016-01-01T00:00:00+02:00').isBefore(time.create('2016-01-01T00:00:00+01:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-01T00:00:00+02:00').isBefore(time.create('2016-01-01T00:00:00+01:00'), 'm')).to.equal(true);
+      });
+      it('should return "false" for too small offsets', function() {
+        expect(time.create('2016-01-01T00:00:00+02:00').isBefore(time.create('2016-01-01T00:00:00+01:00'), 'M')).to.equal(false);
+        expect(time.create('2016-01-01T00:00:00+02:00').isBefore(time.create('2016-01-01T00:00:00+01:00'), 'D')).to.equal(false);
+      });
+
     });
 
     describe('format()', function () {
@@ -18887,7 +18863,7 @@ describe('time', function () {
         expect(time.create('2016-01-01T00:00:00.300').format('SS')).to.equal('30');
         expect(time.create('2016-01-01T00:00:00.900').format('SSS')).to.equal('900');
       });
-      it('should handle timezone masks', function () {
+      it('should handle offset masks', function () {
         expect(time.create('2016-01-01T00:00:00+02:00').format('ZZ')).to.equal('+02:00');
       });
       it('should handle masks when missing locale', function () {
@@ -18925,74 +18901,12 @@ describe('time', function () {
     });
   });
 
-  describe('parse()', function () {
-    it('should return a simple object with parsed Time instances', function () {
-      var obj = {
-        foo: {},
-        bar: 'bat',
-        start: '2016-01-01T00:00:00',
-        end: '2016-01-01T01:00:00'
-      };
-
-      time.parse(obj);
-      expect(obj.start).to.have.property('timeString', '2016-01-01T00:00:00.000+00:00');
-      expect(obj.end).to.have.property('timeString', '2016-01-01T01:00:00.000+00:00');
-    });
-    it('should return an array containing objects with parsed Time instances', function () {
-      var array = [{
-        interval: {
-          foo: {},
-          bar: 'bat',
-          start: '2016-01-01T00:00:00',
-          end: '2016-01-01T01:00:00'
-        }
-      }];
-
-      time.parse(array);
-      expect(array[0].interval.start).to.have.property('timeString', '2016-01-01T00:00:00.000+00:00');
-      expect(array[0].interval.end).to.have.property('timeString', '2016-01-01T01:00:00.000+00:00');
-    });
-    it('should return a simple object containing array with parsed Time instances', function () {
-      var obj = {
-        times: ['2016-01-01T00:00:00+01:00', '2016-01-02T00:00:00+01:00', '2016-01-03T00:00:00+01:00']
-      };
-
-      time.parse(obj);
-      expect(obj.times[0]).to.have.property('timeString', '2016-01-01T00:00:00.000+01:00');
-      expect(obj.times[1]).to.have.property('timeString', '2016-01-02T00:00:00.000+01:00');
-      expect(obj.times[2]).to.have.property('timeString', '2016-01-03T00:00:00.000+01:00');
-    });
-    it('should return array of complex objects with parsed Time instances', function () {
-      var obj = {
-        times: [
-          {
-            name: 'Foo',
-            from: '2016-01-01T00:00:00+01:00',
-            to: '2016-01-02T00:00:00+01:00'
-          },
-          {
-            name: 'Bar',
-            from: '2016-01-03T00:00:00+01:00',
-            to: '2016-01-04T00:00:00+01:00'
-          }
-        ]
-      };
-
-      time.parse(obj);
-      expect(obj.times[0].from).to.have.property('timeString', '2016-01-01T00:00:00.000+01:00');
-      expect(obj.times[0].to).to.have.property('timeString', '2016-01-02T00:00:00.000+01:00');
-      expect(obj.times[1].from).to.have.property('timeString', '2016-01-03T00:00:00.000+01:00');
-      expect(obj.times[1].to).to.have.property('timeString', '2016-01-04T00:00:00.000+01:00');
-    });
-  });
-
   describe('now()', function () {
     it('should return an instance for current time in UTC', function () {
       var t = time.now();
       var d = Date.now();
-      var tzDiff = Math.abs((new Date()).getTimezoneOffset()) * 6e4;
 
-      expect(+time.create() - +t).to.be.within(tzDiff - 20, tzDiff + 20);
+      expect(+time.create() - +t).to.be.within(-20, 20);
       expect(d - +t).to.be.within(0, 2);
       expect(t._offset).to.equal(0);
     });
