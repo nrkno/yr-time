@@ -7,23 +7,10 @@
  * @license MIT
  */
 
-const isPlainObject = require('is-plain-obj');
-
 const DEFAULT_DATE = 'Invalid Date';
 const DEFAULT_DAY_STARTS_AT = 0;
 const DEFAULT_NIGHT_STARTS_AT = 18;
 const DEFAULT_OFFSET = '+00:00';
-const DEFAULT_PARSE_KEYS = [
-  'created',
-  'end',
-  'from',
-  'rise',
-  'set',
-  'start',
-  'times',
-  'to',
-  'update'
-];
 const FLAGS = {
   Y: 1,
   M: 2,
@@ -48,7 +35,6 @@ const RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
 let nightStartsAt = DEFAULT_NIGHT_STARTS_AT;
-let parseKeys = DEFAULT_PARSE_KEYS;
 
 module.exports = {
   isTime,
@@ -63,7 +49,6 @@ module.exports = {
   init (options = {}) {
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
     nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
-    parseKeys = options.parseKeys || DEFAULT_PARSE_KEYS;
   },
 
   /**
@@ -83,40 +68,6 @@ module.exports = {
    */
   now () {
     return this.create().utc();
-  },
-
-  /**
-   * Parse time strings into Time instances
-   * @param {Object} obj
-   * @returns {Object}
-   */
-  parse (obj) {
-    function parseValue (value) {
-      if (Array.isArray(value)) {
-        return value.map((value) => {
-          return ('string' == typeof value) ? new Time(value) : traverse(value);
-        });
-      } else if ('string' == typeof value) {
-        return new Time(value);
-      }
-      return value;
-    }
-
-    function traverse (o) {
-      // Abort if not object or array
-      if (!(Array.isArray(o) || isPlainObject(o))) return o;
-
-      for (const prop in o) {
-        // Only parse whitelisted keys
-        o[prop] = (~parseKeys.indexOf(prop))
-          ? parseValue(o[prop])
-          : traverse(o[prop]);
-      }
-
-      return o;
-    }
-
-    return traverse(obj);
   }
 };
 
@@ -169,7 +120,7 @@ class Time {
   }
 
   /**
-   * Modify TimeZone offset with new 'value' in minutes
+   * Modify Offset with new 'value' in minutes
    * @param {Number} value
    * @returns {Time}
    */
@@ -233,12 +184,13 @@ class Time {
         t1 = t1.startOf('D');
         t2 = t2.startOf('D');
       }
-
-      const delta = t1._date - t2._date;
+      const delta = t1 - t2;
 
       switch (unit) {
         case 'D':
-          diff = delta / 864e5;
+          const offsetDelta = 6e4 * (t1._offset - t2._offset);
+
+          diff = (delta + offsetDelta) / 864e5;
           break;
         case 'H':
           diff = delta / 36e5;
@@ -302,6 +254,18 @@ class Time {
     }
 
     return this;
+  }
+
+  /**
+   * Reset to end of 'unit'
+   * Returns new instance
+   * @param {String} unit
+   * @returns {Time}
+   */
+  endOf (unit) {
+    unit = normalizeUnit(unit === undefined ? 'S' : unit);
+    if (unit === 'S') return this.clone();
+    return this.startOf(unit).add(1, unit).subtract(1, 'S');
   }
 
   /**
@@ -448,7 +412,7 @@ class Time {
   }
 
   /**
-   * Compare 'time', limited by 'unit', and determine if is before
+   * Compare this, limited by 'unit', and determine if this is before 'time'
    * @param {Time} time
    * @param {String} [unit]
    * @returns {Boolean}
@@ -457,36 +421,9 @@ class Time {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
+    const tLimited = unit == 'S' ? this : this.endOf(unit);
 
-    if (!unit || unit == 'S') return +this._date < +time._date;
-
-    const Y1 = this.year();
-    const Y2 = time.year();
-    const M1 = this.month();
-    const M2 = time.month();
-    const D1 = this.date();
-    const D2 = time.date();
-    const H1 = this.hour();
-    const H2 = time.hour();
-    const m1 = this.minute();
-    const m2 = time.minute();
-    const s1 = this.second();
-    const s2 = time.second();
-    let test = false;
-
-    test = Y1 > Y2;
-    if (unit == 'Y') return test;
-    test = test || Y1 == Y2 && M1 > M2;
-    if (unit == 'M') return test;
-    test = test || M1 == M2 && D1 > D2;
-    if (unit == 'D') return test;
-    test = test || D1 == D2 && H1 > H2;
-    if (unit == 'H') return test;
-    test = test || H1 == H2 && m1 > m2;
-    if (unit == 'm') return test;
-    test = test || m1 == m2 && s1 > s2;
-
-    return test;
+    return tLimited.valueOf() < time.valueOf();
   }
 
   /**
@@ -755,7 +692,7 @@ class Time {
    */
   valueOf () {
     if (!this.isValid) return NaN;
-    return +this._date;
+    return +this._date - ((this._offset || 0) * 6e4);
   }
 }
 

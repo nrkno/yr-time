@@ -3,9 +3,7 @@
   "description": "Efficient, immutable, utility for working with time/dates",
   "version": "4.0.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
-  "dependencies": {
-    "is-plain-obj": "1.1.x"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-plugin-syntax-trailing-function-commas": "6.13.0",
     "babel-plugin-transform-async-to-generator": "6.16.0",
@@ -42,6 +40,7 @@
   "scripts": {
     "prepublish": "buddy build",
     "test": "NODE_ENV=test mocha test/test.js --reporter spec",
+    "test-windows": "SET NODE_ENV=test&&mocha test/test.js --reporter spec",
     "test-client": "buddy build && mocha-phantomjs test/test-runner.html"
   },
   "browser": "index.js",
