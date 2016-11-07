@@ -7,23 +7,10 @@
  * @license MIT
  */
 
-const isPlainObject = require('is-plain-obj');
-
 const DEFAULT_DATE = 'Invalid Date';
 const DEFAULT_DAY_STARTS_AT = 0;
 const DEFAULT_NIGHT_STARTS_AT = 18;
 const DEFAULT_OFFSET = '+00:00';
-const DEFAULT_PARSE_KEYS = [
-  'created',
-  'end',
-  'from',
-  'rise',
-  'set',
-  'start',
-  'times',
-  'to',
-  'update'
-];
 const FLAGS = {
   Y: 1,
   M: 2,
@@ -48,7 +35,6 @@ const RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
 let nightStartsAt = DEFAULT_NIGHT_STARTS_AT;
-let parseKeys = DEFAULT_PARSE_KEYS;
 
 module.exports = {
   isTime,
@@ -63,7 +49,6 @@ module.exports = {
   init (options = {}) {
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
     nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
-    parseKeys = options.parseKeys || DEFAULT_PARSE_KEYS;
   },
 
   /**
@@ -83,40 +68,6 @@ module.exports = {
    */
   now () {
     return this.create().utc();
-  },
-
-  /**
-   * Parse time strings into Time instances
-   * @param {Object} obj
-   * @returns {Object}
-   */
-  parse (obj) {
-    function parseValue (value) {
-      if (Array.isArray(value)) {
-        return value.map((value) => {
-          return ('string' == typeof value) ? new Time(value) : traverse(value);
-        });
-      } else if ('string' == typeof value) {
-        return new Time(value);
-      }
-      return value;
-    }
-
-    function traverse (o) {
-      // Abort if not object or array
-      if (!(Array.isArray(o) || isPlainObject(o))) return o;
-
-      for (const prop in o) {
-        // Only parse whitelisted keys
-        o[prop] = (~parseKeys.indexOf(prop))
-          ? parseValue(o[prop])
-          : traverse(o[prop]);
-      }
-
-      return o;
-    }
-
-    return traverse(obj);
   }
 };
 
@@ -223,7 +174,7 @@ class Time {
     let diff = 0;
     let t1 = this;
     let t2 = time;
-    
+
     if (unit == 'Y' || unit == 'M') {
       diff = t1._monthDiff(t2);
       if (unit == 'Y') diff /= 12;
@@ -238,6 +189,7 @@ class Time {
       switch (unit) {
         case 'D':
           const offsetDelta = 6e4 * (t1._offset - t2._offset);
+
           diff = (delta + offsetDelta) / 864e5;
           break;
         case 'H':
@@ -303,7 +255,7 @@ class Time {
 
     return this;
   }
-  
+
   /**
    * Reset to end of 'unit'
    * Returns new instance
@@ -312,9 +264,9 @@ class Time {
    */
   endOf (unit) {
     unit = normalizeUnit(unit === undefined ? 'S' : unit);
-    if (unit === 'S')  return this.clone();
+    if (unit === 'S') return this.clone();
     return this.startOf(unit).add(1, unit).subtract(1, 'S');
-   }
+  }
 
   /**
    * Get/set full year
@@ -469,7 +421,8 @@ class Time {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
-    const tLimited = unit == 'S' ? this : this.endOf(unit);  
+    const tLimited = unit == 'S' ? this : this.endOf(unit);
+
     return tLimited.valueOf() < time.valueOf();
   }
 

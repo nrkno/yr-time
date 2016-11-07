@@ -710,67 +710,6 @@ describe('time', function () {
     });
   });
 
-  describe('parse()', function () {
-    it('should return a simple object with parsed Time instances', function () {
-      var obj = {
-        foo: {},
-        bar: 'bat',
-        start: '2016-01-01T00:00:00',
-        end: '2016-01-01T01:00:00'
-      };
-
-      time.parse(obj);
-      expect(obj.start).to.have.property('timeString', '2016-01-01T00:00:00.000+00:00');
-      expect(obj.end).to.have.property('timeString', '2016-01-01T01:00:00.000+00:00');
-    });
-    it('should return an array containing objects with parsed Time instances', function () {
-      var array = [{
-        interval: {
-          foo: {},
-          bar: 'bat',
-          start: '2016-01-01T00:00:00',
-          end: '2016-01-01T01:00:00'
-        }
-      }];
-
-      time.parse(array);
-      expect(array[0].interval.start).to.have.property('timeString', '2016-01-01T00:00:00.000+00:00');
-      expect(array[0].interval.end).to.have.property('timeString', '2016-01-01T01:00:00.000+00:00');
-    });
-    it('should return a simple object containing array with parsed Time instances', function () {
-      var obj = {
-        times: ['2016-01-01T00:00:00+01:00', '2016-01-02T00:00:00+01:00', '2016-01-03T00:00:00+01:00']
-      };
-
-      time.parse(obj);
-      expect(obj.times[0]).to.have.property('timeString', '2016-01-01T00:00:00.000+01:00');
-      expect(obj.times[1]).to.have.property('timeString', '2016-01-02T00:00:00.000+01:00');
-      expect(obj.times[2]).to.have.property('timeString', '2016-01-03T00:00:00.000+01:00');
-    });
-    it('should return array of complex objects with parsed Time instances', function () {
-      var obj = {
-        times: [
-          {
-            name: 'Foo',
-            from: '2016-01-01T00:00:00+01:00',
-            to: '2016-01-02T00:00:00+01:00'
-          },
-          {
-            name: 'Bar',
-            from: '2016-01-03T00:00:00+01:00',
-            to: '2016-01-04T00:00:00+01:00'
-          }
-        ]
-      };
-
-      time.parse(obj);
-      expect(obj.times[0].from).to.have.property('timeString', '2016-01-01T00:00:00.000+01:00');
-      expect(obj.times[0].to).to.have.property('timeString', '2016-01-02T00:00:00.000+01:00');
-      expect(obj.times[1].from).to.have.property('timeString', '2016-01-03T00:00:00.000+01:00');
-      expect(obj.times[1].to).to.have.property('timeString', '2016-01-04T00:00:00.000+01:00');
-    });
-  });
-
   describe('now()', function () {
     it('should return an instance for current time in UTC', function () {
       var t = time.now();
