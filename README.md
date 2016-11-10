@@ -19,7 +19,6 @@ console.log(t); //=> 2015-12-31 02:00
 **init(_options_)**: override defaults. Options include:
   - **dayStartsAt**: the hour a day begins at (default `0`). Modifies results of `diff()`, `startOf()`, `isSame()`, and `format()`.
   - **nightStartsAt**: the hour night begins (default `18`). Modifies results of `format()` when using `ddr` or `dddr` masks
-  - **parseKeys**: the property keys to parse during `time.parse()` (default `['created', 'end', 'from', 'rise', 'set', 'start', 'times', 'to', 'update']`)
 
 **create(_timeString_)**: create a `Time` instance with `timeString`. The following patterns are valid, with or without offset (`+HH:mm`):
 - `YYYY`: `time.create('2016')` => `2016-01-01T00:00:00.000+00:00`
