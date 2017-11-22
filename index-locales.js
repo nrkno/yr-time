@@ -20,6 +20,12 @@ module.exports = {
     "Friday",
     "Saturday"
   ],
+  "daySlots": {
+    "night": "night",
+    "morning": "morning",
+    "afternoon": "afternoon",
+    "evening": "evening"
+  },
   "format": {
     "LT" : "HH:mm",
     "LTS" : "HH:mm:ss",
@@ -79,6 +85,12 @@ module.exports = {
     "fredag",
     "lørdag"
   ],
+  "daySlots": {
+    "night": "natt",
+    "morning": "morgen",
+    "afternoon": "ettermiddag",
+    "evening": "kveld"
+  },
   "format": {
     "LT" : "HH:mm",
     "LTS" : "HH:mm:ss",
@@ -138,6 +150,12 @@ module.exports = {
     "fredag",
     "laurdag"
   ],
+  "daySlots": {
+    "night": "natt",
+    "morning": "morgon",
+    "afternoon": "ettermiddag",
+    "evening": "kveld"
+  },
   "format": {
     "LT" : "HH:mm",
     "LTS" : "HH:mm:ss",

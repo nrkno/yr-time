@@ -148,6 +148,10 @@ time.create('2016-12-31')
 |                       | dddr**  | Today Tomorrow ... Friday Saturday     |
 | __Hour__              | H       | 0 1 ... 22 23                          |
 |                       | HH      | 00 01 ... 22 23                        |
+|                       | Hr*     | night (0 - 6),                         |
+|                       |         | morning (6 - 12),                      |
+|                       |         | afternoon (12 - 18),                   |
+|                       |         | evening (18 - 24)                      |
 | __Minute__            | m       | 0 1 ... 58 59                          |
 |                       | mm      | 00 01 ... 58 59                        |
 | __Second__            | s       | 0 1 ... 58 59                          |

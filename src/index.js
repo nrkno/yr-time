@@ -30,7 +30,7 @@ const FLAGS_START_OF = {
 };
 // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
 const RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
-const RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
+const RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}r?|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
 const RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
@@ -498,6 +498,9 @@ class Time {
           return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
         case 'dddd':
           return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
+        case 'Hr':
+          let daySlot = this._getTimeOfDay();
+          return this._localeHasProperty('daySlots') ? this._locale.daySlots[daySlot] : '[missing locale]';
         case 'H':
           return this.hour();
         case 'HH':
@@ -600,6 +603,44 @@ class Time {
           : 'today';
     }
     return '';
+  }
+
+  /**
+   * Retrieve the time of the day (night, morning, afternoon, evening)
+   *
+   * @return {string} The time of the day (night, morning, afternoon, evening)
+   * @private
+   */
+  _getTimeOfDay() {
+    const hour = this.hour();
+    if (hour >= 0 && hour < 6) {
+      return 'night';
+    } else if (hour >= 6 && hour < 12) {
+      return 'morning';
+    } else if (hour >= 12 && hour < 18) {
+      return 'afternoon';
+    } else {
+      return 'evening'; // 18 - 24
+    }
+  }
+
+  /**
+   * A helper function that checks if locale is initialized and if the passed localeProperty exist on locale
+   *
+   * Optionally also checks if localeProperty has subProperty
+   *
+   * @param localeProperty {String} Property to check if exist on locale
+   * @param [subProperty] {String} Optional subproperty if locale[localeProperty] is an object
+   * @return {boolean} True if locale has the passed localeProperty
+   * @private
+   */
+  _localeHasProperty(localeProperty, subProperty) {
+    if (subProperty) {
+      return this._locale && this._locale[localeProperty] && this._locale[localeProperty][subProperty];
+    } else {
+      return this._locale && this._locale[localeProperty];
+    }
+
   }
 
   /**

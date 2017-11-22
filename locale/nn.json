@@ -17,6 +17,12 @@
     "fredag",
     "laurdag"
   ],
+  "daySlots": {
+    "night": "natt",
+    "morning": "morgon",
+    "afternoon": "ettermiddag",
+    "evening": "kveld"
+  },
   "format": {
     "LT" : "HH:mm",
     "LTS" : "HH:mm:ss",
