@@ -6,7 +6,7 @@
  * @copyright Yr
  * @license MIT
  */
-
+const MISSING_LOCALE_STRING = '[missing locale]';
 const DEFAULT_DATE = 'Invalid Date';
 const DEFAULT_DAY_STARTS_AT = 0;
 const DEFAULT_NIGHT_STARTS_AT = 18;
@@ -462,6 +462,7 @@ class Time {
     });
 
     mask = mask.replace(RE_TOKEN, (match) => {
+
       switch (match) {
         case 'LT':
         case 'LTS':
@@ -469,7 +470,7 @@ class Time {
         case 'LL':
         case 'LLL':
         case 'LLLL':
-          return this._locale && this._locale.format && this._locale.format[match] ? this.format(this._locale.format[match], daysFromNow) : '[missing locale]';
+          return this._locale && this._locale.format && this._locale.format[match] ? this.format(this._locale.format[match], daysFromNow) : MISSING_LOCALE_STRING;
         case 'YY':
           return String(this.year()).slice(-2);
         case 'YYYY':
@@ -479,28 +480,28 @@ class Time {
         case 'MM':
           return pad(this.month() + 1);
         case 'MMM':
-          return this._locale && this._locale.monthsShort ? this._locale.monthsShort[this.month()] : '[missing locale]';
+          return this._locale && this._locale.monthsShort ? this._locale.monthsShort[this.month()] : MISSING_LOCALE_STRING;
         case 'MMMM':
-          return this._locale && this._locale.months ? this._locale.months[this.month()] : '[missing locale]';
+          return this._locale && this._locale.months ? this._locale.months[this.month()] : MISSING_LOCALE_STRING;
         case 'D':
           return this.date();
         case 'DD':
           return pad(this.date());
         case 'ddr':
-          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
-          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
+          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddr':
-          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
-          return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
+          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._locale && this._locale.days ? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
         case 'd':
           return this.day();
         case 'ddd':
-          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
+          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddd':
-          return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
+          return this._locale && this._locale.days ? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
         case 'Hr':
           let daySlot = this._getTimeOfDay();
-          return this._localeHasProperty('daySlots') ? this._locale.daySlots[daySlot] : '[missing locale]';
+          return this._localeHasProperty('daySlots') ? this._locale.daySlots[daySlot] : MISSING_LOCALE_STRING;
         case 'H':
           return this.hour();
         case 'HH':
