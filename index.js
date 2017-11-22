@@ -79,7 +79,7 @@ module.exports = {
 var Time = function () {
   /**
    * Constructor
-   * @param {String} timeString
+   * @param {String} [timeString]
    */
   function Time(timeString) {
     babelHelpers.classCallCheck(this, Time);
@@ -814,7 +814,7 @@ function update(instance) {
 
 /**
  * Normalize 'unit'
- * @param {Strong} unit
+ * @param {String} unit
  * @returns {String}
  */
 function normalizeUnit(unit) {
@@ -888,7 +888,7 @@ function round(value) {
 /**
  * Pad 'value' with zeros up to desired 'length'
  * @param {String|Number} value
- * @param {Number} length
+ * @param {Number} [length]
  * @returns {String}
  */
 function pad(value, length) {

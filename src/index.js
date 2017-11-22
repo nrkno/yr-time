@@ -53,12 +53,12 @@ module.exports = {
 
   /**
    * Instance factory
-   * @param {String} timeString
+   * @param {String|Time} [timeString]
    * @returns {Time}
    */
   create (timeString) {
     // Return if passed Time instance
-    if (timeString && 'string' != typeof timeString && isTime(timeString)) return timeString;
+    if (timeString && typeof timeString != 'string' && isTime(timeString)) return timeString;
     return new Time(timeString);
   },
 
@@ -74,7 +74,7 @@ module.exports = {
 class Time {
   /**
    * Constructor
-   * @param {String} timeString
+   * @param {String} [timeString]
    */
   constructor (timeString) {
     // Return if timeString not a string
@@ -763,7 +763,7 @@ function update (instance) {
 
 /**
  * Normalize 'unit'
- * @param {Strong} unit
+ * @param {String} unit
  * @returns {String}
  */
 function normalizeUnit (unit) {
@@ -838,7 +838,7 @@ function round (value) {
 /**
  * Pad 'value' with zeros up to desired 'length'
  * @param {String|Number} value
- * @param {Number} length
+ * @param {Number} [length]
  * @returns {String}
  */
 function pad (value, length) {
