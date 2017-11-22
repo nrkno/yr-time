@@ -480,25 +480,25 @@ class Time {
         case 'MM':
           return pad(this.month() + 1);
         case 'MMM':
-          return this._locale && this._locale.monthsShort ? this._locale.monthsShort[this.month()] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('monthsShort') ? this._locale.monthsShort[this.month()] : MISSING_LOCALE_STRING;
         case 'MMMM':
-          return this._locale && this._locale.months ? this._locale.months[this.month()] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('months') ? this._locale.months[this.month()] : MISSING_LOCALE_STRING;
         case 'D':
           return this.date();
         case 'DD':
           return pad(this.date());
         case 'ddr':
-          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
-          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
+          if (relativeDay) return this._localeHasProperty(relativeDay) ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('daysShort') ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddr':
-          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
-          return this._locale && this._locale.days ? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
+          if (relativeDay) return this._localeHasProperty(relativeDay) ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('days') ? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
         case 'd':
           return this.day();
         case 'ddd':
-          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
+          return  this._localeHasProperty('daysShort') ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddd':
-          return this._locale && this._locale.days ? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('days')? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
         case 'Hr':
           let daySlot = this._getTimeOfDay();
           return this._localeHasProperty('daySlots') ? this._locale.daySlots[daySlot] : MISSING_LOCALE_STRING;
