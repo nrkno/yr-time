@@ -57,12 +57,12 @@ module.exports = {
 
   /**
    * Instance factory
-   * @param {String} timeString
+   * @param {String|Time} [timeString]
    * @returns {Time}
    */
   create: function create(timeString) {
     // Return if passed Time instance
-    if (timeString && 'string' != typeof timeString && isTime(timeString)) return timeString;
+    if (timeString && typeof timeString != 'string' && isTime(timeString)) return timeString;
     return new Time(timeString);
   },
 
