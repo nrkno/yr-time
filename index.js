@@ -7,6 +7,7 @@
  * @license MIT
  */
 
+var MISSING_LOCALE_STRING = '[missing locale]';
 var DEFAULT_DATE = 'Invalid Date';
 var DEFAULT_DAY_STARTS_AT = 0;
 var DEFAULT_NIGHT_STARTS_AT = 18;
@@ -30,7 +31,7 @@ var FLAGS_START_OF = {
 };
 // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
 var RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
-var RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
+var RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}r?|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
 var RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 var RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 var dayStartsAt = DEFAULT_DAY_STARTS_AT;
@@ -78,7 +79,7 @@ module.exports = {
 var Time = function () {
   /**
    * Constructor
-   * @param {String} timeString
+   * @param {String} [timeString]
    */
   function Time(timeString) {
     babelHelpers.classCallCheck(this, Time);
@@ -489,6 +490,7 @@ var Time = function () {
     });
 
     mask = mask.replace(RE_TOKEN, function (match) {
+
       switch (match) {
         case 'LT':
         case 'LTS':
@@ -496,7 +498,7 @@ var Time = function () {
         case 'LL':
         case 'LLL':
         case 'LLLL':
-          return _this._locale && _this._locale.format && _this._locale.format[match] ? _this.format(_this._locale.format[match], daysFromNow) : '[missing locale]';
+          return _this._locale && _this._locale.format && _this._locale.format[match] ? _this.format(_this._locale.format[match], daysFromNow) : MISSING_LOCALE_STRING;
         case 'YY':
           return String(_this.year()).slice(-2);
         case 'YYYY':
@@ -506,25 +508,28 @@ var Time = function () {
         case 'MM':
           return pad(_this.month() + 1);
         case 'MMM':
-          return _this._locale && _this._locale.monthsShort ? _this._locale.monthsShort[_this.month()] : '[missing locale]';
+          return _this._localeHasProperty('monthsShort') ? _this._locale.monthsShort[_this.month()] : MISSING_LOCALE_STRING;
         case 'MMMM':
-          return _this._locale && _this._locale.months ? _this._locale.months[_this.month()] : '[missing locale]';
+          return _this._localeHasProperty('months') ? _this._locale.months[_this.month()] : MISSING_LOCALE_STRING;
         case 'D':
           return _this.date();
         case 'DD':
           return pad(_this.date());
         case 'ddr':
-          if (relativeDay) return _this._locale && _this._locale[relativeDay] ? _this._locale[relativeDay] : '[missing locale]';
-          return _this._locale && _this._locale.daysShort ? _this._locale.daysShort[_this.day()] : '[missing locale]';
+          if (relativeDay) return _this._localeHasProperty(relativeDay) ? _this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return _this._localeHasProperty('daysShort') ? _this._locale.daysShort[_this.day()] : MISSING_LOCALE_STRING;
         case 'dddr':
-          if (relativeDay) return _this._locale && _this._locale[relativeDay] ? _this._locale[relativeDay] : '[missing locale]';
-          return _this._locale && _this._locale.days ? _this._locale.days[_this.day()] : '[missing locale]';
+          if (relativeDay) return _this._localeHasProperty(relativeDay) ? _this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return _this._localeHasProperty('days') ? _this._locale.days[_this.day()] : MISSING_LOCALE_STRING;
         case 'd':
           return _this.day();
         case 'ddd':
-          return _this._locale && _this._locale.daysShort ? _this._locale.daysShort[_this.day()] : '[missing locale]';
+          return _this._localeHasProperty('daysShort') ? _this._locale.daysShort[_this.day()] : MISSING_LOCALE_STRING;
         case 'dddd':
-          return _this._locale && _this._locale.days ? _this._locale.days[_this.day()] : '[missing locale]';
+          return _this._localeHasProperty('days') ? _this._locale.days[_this.day()] : MISSING_LOCALE_STRING;
+        case 'Hr':
+          var daySlot = _this._getTimeOfDay();
+          return _this._localeHasProperty('daySlots') ? _this._locale.daySlots[daySlot] : MISSING_LOCALE_STRING;
         case 'H':
           return _this.hour();
         case 'HH':
@@ -633,6 +638,47 @@ var Time = function () {
       return daysFromNow == 1 ? 'tomorrow' : hour >= nightStartsAt || hour < dayStartsAt ? 'tonight' : 'today';
     }
     return '';
+  };
+
+  /**
+   * Retrieve the time of the day (night, morning, afternoon, evening)
+   *
+   * @return {string} The time of the day (night, morning, afternoon, evening)
+   * @private
+   */
+
+
+  Time.prototype._getTimeOfDay = function _getTimeOfDay() {
+    var hour = this.hour();
+    if (hour >= 0 && hour < 6) {
+      return 'night';
+    } else if (hour >= 6 && hour < 12) {
+      return 'morning';
+    } else if (hour >= 12 && hour < 18) {
+      return 'afternoon';
+    } else {
+      return 'evening'; // 18 - 24
+    }
+  };
+
+  /**
+   * A helper function that checks if locale is initialized and if the passed localeProperty exist on locale
+   *
+   * Optionally also checks if localeProperty has subProperty
+   *
+   * @param localeProperty {String} Property to check if exist on locale
+   * @param [subProperty] {String} Optional subproperty if locale[localeProperty] is an object
+   * @return {boolean} True if locale has the passed localeProperty
+   * @private
+   */
+
+
+  Time.prototype._localeHasProperty = function _localeHasProperty(localeProperty, subProperty) {
+    if (subProperty) {
+      return this._locale && this._locale[localeProperty] && this._locale[localeProperty][subProperty];
+    } else {
+      return this._locale && this._locale[localeProperty];
+    }
   };
 
   /**
@@ -768,7 +814,7 @@ function update(instance) {
 
 /**
  * Normalize 'unit'
- * @param {Strong} unit
+ * @param {String} unit
  * @returns {String}
  */
 function normalizeUnit(unit) {
@@ -842,7 +888,7 @@ function round(value) {
 /**
  * Pad 'value' with zeros up to desired 'length'
  * @param {String|Number} value
- * @param {Number} length
+ * @param {Number} [length]
  * @returns {String}
  */
 function pad(value, length) {

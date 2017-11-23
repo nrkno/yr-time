@@ -17,6 +17,12 @@
     "Friday",
     "Saturday"
   ],
+  "daySlots": {
+    "night": "night",
+    "morning": "morning",
+    "afternoon": "afternoon",
+    "evening": "evening"
+  },
   "format": {
     "LT" : "HH:mm",
     "LTS" : "HH:mm:ss",

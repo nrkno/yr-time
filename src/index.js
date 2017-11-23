@@ -6,7 +6,7 @@
  * @copyright Yr
  * @license MIT
  */
-
+const MISSING_LOCALE_STRING = '[missing locale]';
 const DEFAULT_DATE = 'Invalid Date';
 const DEFAULT_DAY_STARTS_AT = 0;
 const DEFAULT_NIGHT_STARTS_AT = 18;
@@ -30,7 +30,7 @@ const FLAGS_START_OF = {
 };
 // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
 const RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
-const RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
+const RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}r?|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
 const RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
@@ -53,12 +53,12 @@ module.exports = {
 
   /**
    * Instance factory
-   * @param {String} timeString
+   * @param {String|Time} [timeString]
    * @returns {Time}
    */
   create (timeString) {
     // Return if passed Time instance
-    if (timeString && 'string' != typeof timeString && isTime(timeString)) return timeString;
+    if (timeString && typeof timeString != 'string' && isTime(timeString)) return timeString;
     return new Time(timeString);
   },
 
@@ -74,7 +74,7 @@ module.exports = {
 class Time {
   /**
    * Constructor
-   * @param {String} timeString
+   * @param {String} [timeString]
    */
   constructor (timeString) {
     // Return if timeString not a string
@@ -462,6 +462,7 @@ class Time {
     });
 
     mask = mask.replace(RE_TOKEN, (match) => {
+
       switch (match) {
         case 'LT':
         case 'LTS':
@@ -469,7 +470,7 @@ class Time {
         case 'LL':
         case 'LLL':
         case 'LLLL':
-          return this._locale && this._locale.format && this._locale.format[match] ? this.format(this._locale.format[match], daysFromNow) : '[missing locale]';
+          return this._locale && this._locale.format && this._locale.format[match] ? this.format(this._locale.format[match], daysFromNow) : MISSING_LOCALE_STRING;
         case 'YY':
           return String(this.year()).slice(-2);
         case 'YYYY':
@@ -479,25 +480,28 @@ class Time {
         case 'MM':
           return pad(this.month() + 1);
         case 'MMM':
-          return this._locale && this._locale.monthsShort ? this._locale.monthsShort[this.month()] : '[missing locale]';
+          return this._localeHasProperty('monthsShort') ? this._locale.monthsShort[this.month()] : MISSING_LOCALE_STRING;
         case 'MMMM':
-          return this._locale && this._locale.months ? this._locale.months[this.month()] : '[missing locale]';
+          return this._localeHasProperty('months') ? this._locale.months[this.month()] : MISSING_LOCALE_STRING;
         case 'D':
           return this.date();
         case 'DD':
           return pad(this.date());
         case 'ddr':
-          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
-          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
+          if (relativeDay) return this._localeHasProperty(relativeDay) ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('daysShort') ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddr':
-          if (relativeDay) return this._locale && this._locale[relativeDay] ? this._locale[relativeDay] : '[missing locale]';
-          return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
+          if (relativeDay) return this._localeHasProperty(relativeDay) ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('days') ? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
         case 'd':
           return this.day();
         case 'ddd':
-          return this._locale && this._locale.daysShort ? this._locale.daysShort[this.day()] : '[missing locale]';
+          return  this._localeHasProperty('daysShort') ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddd':
-          return this._locale && this._locale.days ? this._locale.days[this.day()] : '[missing locale]';
+          return this._localeHasProperty('days')? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
+        case 'Hr':
+          let daySlot = this._getTimeOfDay();
+          return this._localeHasProperty('daySlots') ? this._locale.daySlots[daySlot] : MISSING_LOCALE_STRING;
         case 'H':
           return this.hour();
         case 'HH':
@@ -600,6 +604,44 @@ class Time {
           : 'today';
     }
     return '';
+  }
+
+  /**
+   * Retrieve the time of the day (night, morning, afternoon, evening)
+   *
+   * @return {string} The time of the day (night, morning, afternoon, evening)
+   * @private
+   */
+  _getTimeOfDay() {
+    const hour = this.hour();
+    if (hour >= 0 && hour < 6) {
+      return 'night';
+    } else if (hour >= 6 && hour < 12) {
+      return 'morning';
+    } else if (hour >= 12 && hour < 18) {
+      return 'afternoon';
+    } else {
+      return 'evening'; // 18 - 24
+    }
+  }
+
+  /**
+   * A helper function that checks if locale is initialized and if the passed localeProperty exist on locale
+   *
+   * Optionally also checks if localeProperty has subProperty
+   *
+   * @param localeProperty {String} Property to check if exist on locale
+   * @param [subProperty] {String} Optional subproperty if locale[localeProperty] is an object
+   * @return {boolean} True if locale has the passed localeProperty
+   * @private
+   */
+  _localeHasProperty(localeProperty, subProperty) {
+    if (subProperty) {
+      return this._locale && this._locale[localeProperty] && this._locale[localeProperty][subProperty];
+    } else {
+      return this._locale && this._locale[localeProperty];
+    }
+
   }
 
   /**
@@ -721,7 +763,7 @@ function update (instance) {
 
 /**
  * Normalize 'unit'
- * @param {Strong} unit
+ * @param {String} unit
  * @returns {String}
  */
 function normalizeUnit (unit) {
@@ -796,7 +838,7 @@ function round (value) {
 /**
  * Pad 'value' with zeros up to desired 'length'
  * @param {String|Number} value
- * @param {Number} length
+ * @param {Number} [length]
  * @returns {String}
  */
 function pad (value, length) {

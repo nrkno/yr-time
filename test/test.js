@@ -707,6 +707,38 @@ describe('time', function () {
         expect(time.create('2016-01-01T07:00:00').locale(nb).format('LLL', 0)).to.equal('1. januar 2016 kl. 07:00');
         expect(time.create('2016-01-01T07:00:00').locale(nb).format('LLLL', 0)).to.equal('fredag 1. januar 2016 kl. 07:00');
       });
+
+      it('should handle "HR" format', () => {
+        expect(time.create('2016-01-01T07:00:00').locale(nb).format('Hr', 0)).to.equal('morgen');
+      });
+
+      it('should return evening between 00:00:00 and 05:59:59', () => {
+        expect(time.create('2016-01-01T00:00:00').locale(nb).format('Hr', 0)).to.equal('natt');
+        expect(time.create('2016-01-01T03:00:00').locale(nb).format('Hr', 0)).to.equal('natt');
+        expect(time.create('2016-01-01T05:59:59').locale(nb).format('Hr', 0)).to.equal('natt');
+      });
+
+      it('should return morning between 06:00:00 and 11:59:59', () => {
+        expect(time.create('2016-01-01T06:00:00').locale(nb).format('Hr', 0)).to.equal('morgen');
+        expect(time.create('2016-01-01T09:00:00').locale(nb).format('Hr', 0)).to.equal('morgen');
+        expect(time.create('2016-01-01T11:59:59').locale(nb).format('Hr', 0)).to.equal('morgen');
+      });
+
+      it('should return afternoon between 12:00:00 and 17:59:59', () => {
+        expect(time.create('2016-01-01T12:00:00').locale(nb).format('Hr', 0)).to.equal('ettermiddag');
+        expect(time.create('2016-01-01T15:00:00').locale(nb).format('Hr', 0)).to.equal('ettermiddag');
+        expect(time.create('2016-01-01T17:59:59').locale(nb).format('Hr', 0)).to.equal('ettermiddag');
+      });
+
+      it('should return evening between 18:00:00 and 23:59:59', () => {
+        expect(time.create('2016-01-01T18:00:00').locale(nb).format('Hr', 0)).to.equal('kveld');
+        expect(time.create('2016-01-01T21:00:00').locale(nb).format('Hr', 0)).to.equal('kveld');
+        expect(time.create('2016-01-01T23:59:59').locale(nb).format('Hr', 0)).to.equal('kveld');
+      });
+
+      it('should return [missing locale] when locale is not set up', () => {
+        expect(time.create('2016-01-01T18:00:00').format('Hr', 0)).to.equal('[missing locale]');
+      });
     });
   });
 
