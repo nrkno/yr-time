@@ -97,12 +97,12 @@ class Time {
     if (!match) return;
 
     const year = +match[1];
-    const month = +match[2] || 1;
-    const day = +match[3] || 1;
-    const hour = +match[4] || 0;
-    const minute = +match[5] || 0;
-    const second = +match[6] || 0;
-    const millisecond = +match[7] || 0;
+    var month = typeof match[2] === 'undefined' ? 1 : +match[2];
+    var day = typeof match[3] === 'undefined' ? 1 : +match[3];
+    var hour = typeof match[4] === 'undefined' ? 1 : +match[4];
+    var minute = typeof match[5] === 'undefined' ? 0 : +match[5];
+    var second = typeof match[6] === 'undefined' ? 0 : +match[6];
+    var millisecond = typeof match[7] === 'undefined' ? 0 : +match[7];
     const offset = match[8] || '';
 
     // Handle TZ offset

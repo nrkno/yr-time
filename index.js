@@ -104,12 +104,12 @@ var Time = function () {
     if (!match) return;
 
     var year = +match[1];
-    var month = +match[2] || 1;
-    var day = +match[3] || 1;
-    var hour = +match[4] || 0;
-    var minute = +match[5] || 0;
-    var second = +match[6] || 0;
-    var millisecond = +match[7] || 0;
+    var month = typeof match[2] === 'undefined' ? 1 : +match[2];
+    var day = typeof match[3] === 'undefined' ? 1 : +match[3];
+    var hour = typeof match[4] === 'undefined' ? 1 : +match[4];
+    var minute = typeof match[5] === 'undefined' ? 0 : +match[5];
+    var second = typeof match[6] === 'undefined' ? 0 : +match[6];
+    var millisecond = typeof match[7] === 'undefined' ? 0 : +match[7];
     var offset = match[8] || '';
 
     // Handle TZ offset
