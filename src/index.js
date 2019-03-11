@@ -96,12 +96,12 @@ class Time {
 
     if (!match) return;
 
-    // We check for match[i] == null because of a bug in Samsung Internet browser causing the +match[i] to fail after many iterations
+    // We check for match[i] == null because of a bug in Samsung Internet browser causing the RegEx matching to fail after many iterations
     // Link to GitHub issue: https://github.com/SamsungInternet/support/issues/82
     const year = parseInt(match[1], 10);
     const month = match[2] == null ? 1 : parseInt(match[2], 10);
     const day = match[3] == null ? 1 : parseInt(match[3], 10);
-    const hour = match[4] == null ? 1 : parseInt(match[4], 10);
+    const hour = match[4] == null ? 0 : parseInt(match[4], 10);
     const minute = match[5] == null ? 0 : parseInt(match[5], 10);
     const second = match[6] == null ? 0 : parseInt(match[6], 10);
     const millisecond = match[7] == null ? 0 : parseInt(match[7], 10);
