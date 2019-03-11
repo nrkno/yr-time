@@ -103,16 +103,16 @@ var Time = function () {
 
     if (!match) return;
 
-    // We check for typeof == null because of a bug in Samsung Internet browser causing the +match[i] to fail after many iterations
+    // We check for match[i] == null because of a bug in Samsung Internet browser causing the +match[i] to fail after many iterations
     // Link to GitHub issue: https://github.com/SamsungInternet/support/issues/82
-    var year = +match[1];
-    var month = match[2] == null ? 1 : +match[2];
-    var day = match[3] == null ? 1 : +match[3];
-    var hour = match[4] == null ? 1 : +match[4];
-    var minute = match[5] == null ? 0 : +match[5];
-    var second = match[6] == null ? 0 : +match[6];
-    var millisecond = match[7] == null ? 0 : +match[7];
-    var offset = match[8] || '';
+    var year = parseInt(match[1], 10);
+    var month = match[2] == null ? 1 : parseInt(match[2], 10);
+    var day = match[3] == null ? 1 : parseInt(match[3], 10);
+    var hour = match[4] == null ? 1 : parseInt(match[4], 10);
+    var minute = match[5] == null ? 0 : parseInt(match[5], 10);
+    var second = match[6] == null ? 0 : parseInt(match[6], 10);
+    var millisecond = match[7] == null ? 0 : parseInt(match[7], 10);
+    var offset = match[8] == null ? '' : match[8];
 
     // Handle TZ offset
     if (offset && offset != DEFAULT_OFFSET) {
@@ -492,6 +492,7 @@ var Time = function () {
     });
 
     mask = mask.replace(RE_TOKEN, function (match) {
+
       switch (match) {
         case 'LT':
         case 'LTS':
