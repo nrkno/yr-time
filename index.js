@@ -492,7 +492,6 @@ var Time = function () {
     });
 
     mask = mask.replace(RE_TOKEN, function (match) {
-
       switch (match) {
         case 'LT':
         case 'LTS':

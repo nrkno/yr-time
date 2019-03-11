@@ -99,12 +99,12 @@ class Time {
     // We check for typeof === 'undefined' because of a bug in Samsung Internet browser causing the +match[i] to fail after many iterations
     // Link to GitHub issue: https://github.com/SamsungInternet/support/issues/82
     const year = +match[1];
-    var month = typeof match[2] === 'undefined' ? 1 : +match[2];
-    var day = typeof match[3] === 'undefined' ? 1 : +match[3];
-    var hour = typeof match[4] === 'undefined' ? 1 : +match[4];
-    var minute = typeof match[5] === 'undefined' ? 0 : +match[5];
-    var second = typeof match[6] === 'undefined' ? 0 : +match[6];
-    var millisecond = typeof match[7] === 'undefined' ? 0 : +match[7];
+    const month = typeof match[2] === 'undefined' ? 1 : +match[2];
+    const day = typeof match[3] === 'undefined' ? 1 : +match[3];
+    const hour = typeof match[4] === 'undefined' ? 1 : +match[4];
+    const minute = typeof match[5] === 'undefined' ? 0 : +match[5];
+    const second = typeof match[6] === 'undefined' ? 0 : +match[6];
+    const millisecond = typeof match[7] === 'undefined' ? 0 : +match[7];
     const offset = match[8] || '';
 
     // Handle TZ offset
