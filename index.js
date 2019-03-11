@@ -103,14 +103,16 @@ var Time = function () {
 
     if (!match) return;
 
-    var year = +match[1];
-    var month = +match[2] || 1;
-    var day = +match[3] || 1;
-    var hour = +match[4] || 0;
-    var minute = +match[5] || 0;
-    var second = +match[6] || 0;
-    var millisecond = +match[7] || 0;
-    var offset = match[8] || '';
+    // We check for match[i] == null because of a bug in Samsung Internet browser causing the RegEx matching to fail after many iterations
+    // Link to GitHub issue: https://github.com/SamsungInternet/support/issues/82
+    var year = parseInt(match[1], 10);
+    var month = match[2] == null ? 1 : parseInt(match[2], 10);
+    var day = match[3] == null ? 1 : parseInt(match[3], 10);
+    var hour = match[4] == null ? 0 : parseInt(match[4], 10);
+    var minute = match[5] == null ? 0 : parseInt(match[5], 10);
+    var second = match[6] == null ? 0 : parseInt(match[6], 10);
+    var millisecond = match[7] == null ? 0 : parseInt(match[7], 10);
+    var offset = match[8] == null ? '' : match[8];
 
     // Handle TZ offset
     if (offset && offset != DEFAULT_OFFSET) {
