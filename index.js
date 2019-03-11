@@ -103,6 +103,8 @@ var Time = function () {
 
     if (!match) return;
 
+    // We check for typeof === 'undefined' because of a bug in Samsung Internet browser causing the +match[i] to fail after many iterations
+    // Link to GitHub issue: https://github.com/SamsungInternet/support/issues/82
     var year = +match[1];
     var month = typeof match[2] === 'undefined' ? 1 : +match[2];
     var day = typeof match[3] === 'undefined' ? 1 : +match[3];
