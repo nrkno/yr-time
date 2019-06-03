@@ -46,7 +46,7 @@ export default {
    *  - {Number} nightStartsAt
    *  - {Array} parseKeys
    */
-  init(options = {}) {
+  init (options = {}) {
     dayStartsAt = options.dayStartsAt || DEFAULT_DAY_STARTS_AT;
     nightStartsAt = options.nightStartsAt || DEFAULT_NIGHT_STARTS_AT;
   },
@@ -56,10 +56,9 @@ export default {
    * @param {String|Time} [timeString]
    * @returns {Time}
    */
-  create(timeString) {
+  create (timeString) {
     // Return if passed Time instance
-    if (timeString && typeof timeString != 'string' && isTime(timeString))
-      return timeString;
+    if (timeString && typeof timeString != 'string' && isTime(timeString)) return timeString;
     return new Time(timeString);
   },
 
@@ -67,7 +66,7 @@ export default {
    * Retrieve instance at current client time
    * @returns {Time}
    */
-  now() {
+  now () {
     return this.create().utc();
   }
 };
@@ -77,7 +76,7 @@ class Time {
    * Constructor
    * @param {String} [timeString]
    */
-  constructor(timeString) {
+  constructor (timeString) {
     // Return if timeString not a string
     if (timeString && 'string' != typeof timeString) return timeString;
 
@@ -110,16 +109,14 @@ class Time {
 
     // Handle TZ offset
     if (offset && offset != DEFAULT_OFFSET) {
-      const dir = match[9] == '+' ? 1 : -1;
+      const dir = (match[9] == '+') ? 1 : -1;
 
-      this._offset = dir * (+match[10] * 60 + +match[11]);
+      this._offset = dir * ((+match[10] * 60) + +match[11]);
       this._offsetString = offset;
     }
 
     // Create UTC date based on local time so we can always use UTC methods
-    this._date = new Date(
-      Date.UTC(year, month - 1, day, hour, minute, second, millisecond)
-    );
+    this._date = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
     this.isValid = isValid(this._date);
     this.timeString = this.toString();
   }
@@ -129,7 +126,7 @@ class Time {
    * @param {Number} value
    * @returns {Time}
    */
-  offset(value) {
+  offset (value) {
     if (value == this._offset) return this;
 
     let instance = this.utc()._manipulate(value, 'minutes');
@@ -147,7 +144,7 @@ class Time {
    * @param {String} unit
    * @returns {Time}
    */
-  add(value, unit) {
+  add (value, unit) {
     return this._manipulate(value, unit);
   }
 
@@ -158,7 +155,7 @@ class Time {
    * @param {String} unit
    * @returns {Time}
    */
-  subtract(value, unit) {
+  subtract (value, unit) {
     return this._manipulate(value * -1, unit);
   }
 
@@ -170,7 +167,7 @@ class Time {
    * @param {Boolean} [asFloat]
    * @returns {Number}
    */
-  diff(time, unit, asFloat) {
+  diff (time, unit, asFloat) {
     if (!this.isValid) return NaN;
     if (!time.isValid) return NaN;
 
@@ -220,7 +217,7 @@ class Time {
    * @param {String} unit
    * @returns {Time}
    */
-  startOf(unit) {
+  startOf (unit) {
     if (this.isValid) {
       unit = normalizeUnit(unit);
 
@@ -239,8 +236,7 @@ class Time {
               break;
             case 'H':
               // Adjust day if less than day start hour
-              if (unit == 'D' && dayStartsAt > d.getUTCHours())
-                d.setUTCDate(d.getUTCDate() - 1);
+              if (unit == 'D' && dayStartsAt > d.getUTCHours()) d.setUTCDate(d.getUTCDate() - 1);
               d.setUTCHours(dayStartsAt);
               break;
             case 'm':
@@ -268,12 +264,10 @@ class Time {
    * @param {String} unit
    * @returns {Time}
    */
-  endOf(unit) {
+  endOf (unit) {
     unit = normalizeUnit(unit === undefined ? 'S' : unit);
     if (unit === 'S') return this.clone();
-    return this.startOf(unit)
-      .add(1, unit)
-      .subtract(1, 'S');
+    return this.startOf(unit).add(1, unit).subtract(1, 'S');
   }
 
   /**
@@ -282,7 +276,7 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  year(value) {
+  year (value) {
     if (value != null) return this._set(value, 'setUTCFullYear');
     return this._date.getUTCFullYear();
   }
@@ -293,7 +287,7 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  month(value) {
+  month (value) {
     if (value != null) return this._set(value, 'setUTCMonth');
     return this._date.getUTCMonth();
   }
@@ -304,7 +298,7 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  date(value) {
+  date (value) {
     if (value != null) return this._set(value, 'setUTCDate');
     return this._date.getUTCDate();
   }
@@ -315,11 +309,10 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  day(value) {
+  day (value) {
     const day = this._date.getUTCDay();
 
-    if (value != null)
-      return this._set(this.date() + value - day, 'setUTCDate');
+    if (value != null) return this._set(this.date() + value - day, 'setUTCDate');
     return day;
   }
 
@@ -329,7 +322,7 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  hour(value) {
+  hour (value) {
     if (value != null) return this._set(value, 'setUTCHours');
     return this._date.getUTCHours();
   }
@@ -340,7 +333,7 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  minute(value) {
+  minute (value) {
     if (value != null) return this._set(value, 'setUTCMinutes');
     return this._date.getUTCMinutes();
   }
@@ -351,7 +344,7 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  second(value) {
+  second (value) {
     if (value != null) return this._set(value, 'setUTCSeconds');
     return this._date.getUTCSeconds();
   }
@@ -362,7 +355,7 @@ class Time {
    * @param {Number} [value]
    * @returns {Number|Time}
    */
-  millisecond(value) {
+  millisecond (value) {
     if (value != null) return this._set(value, 'setUTCMilliseconds');
     return this._date.getUTCMilliseconds();
   }
@@ -373,7 +366,7 @@ class Time {
    * @param {String} [unit]
    * @returns {Boolean}
    */
-  isSame(time, unit) {
+  isSame (time, unit) {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
@@ -393,37 +386,30 @@ class Time {
       case 'Y':
         return t1.year() == t2.year();
       case 'M':
-        return t1.year() == t2.year() && t1.month() == t2.month();
+        return t1.year() == t2.year()
+          && t1.month() == t2.month();
       case 'D':
-        return (
-          t1.year() == t2.year() &&
-          t1.month() == t2.month() &&
-          t1.date() == t2.date()
-        );
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date();
       case 'H':
-        return (
-          t1.year() == t2.year() &&
-          t1.month() == t2.month() &&
-          t1.date() == t2.date() &&
-          t1.hour() == t2.hour()
-        );
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date()
+          && t1.hour() == t2.hour();
       case 'm':
-        return (
-          t1.year() == t2.year() &&
-          t1.month() == t2.month() &&
-          t1.date() == t2.date() &&
-          t1.hour() == t2.hour() &&
-          t1.minute() == t2.minute()
-        );
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date()
+          && t1.hour() == t2.hour()
+          && t1.minute() == t2.minute();
       case 's':
-        return (
-          t1.year() == t2.year() &&
-          t1.month() == t2.month() &&
-          t1.date() == t2.date() &&
-          t1.hour() == t2.hour() &&
-          t1.minute() == t2.minute() &&
-          t1.second() == t2.second()
-        );
+        return t1.year() == t2.year()
+          && t1.month() == t2.month()
+          && t1.date() == t2.date()
+          && t1.hour() == t2.hour()
+          && t1.minute() == t2.minute()
+          && t1.second() == t2.second();
     }
   }
 
@@ -433,7 +419,7 @@ class Time {
    * @param {String} [unit]
    * @returns {Boolean}
    */
-  isBefore(time, unit) {
+  isBefore (time, unit) {
     if (!this.isValid || !time.isValid) return false;
 
     unit = normalizeUnit(unit);
@@ -447,7 +433,7 @@ class Time {
    * @param {Object} locale
    * @returns {Time}
    */
-  locale(locale) {
+  locale (locale) {
     let instance = this.clone();
 
     instance._locale = locale;
@@ -460,23 +446,25 @@ class Time {
    * @param {Number} [daysFromNow]
    * @returns {String}
    */
-  format(mask, daysFromNow) {
+  format (mask, daysFromNow) {
     if (!mask) return this.timeString;
     // Prevent regex denial of service
     if (mask.length > 100) return '';
 
-    const relativeDay =
-      daysFromNow != null ? this._getRelativeDay(daysFromNow) : '';
+    const relativeDay = (daysFromNow != null)
+      ? this._getRelativeDay(daysFromNow)
+      : '';
     let escaped = [];
     let idx = 0;
 
     // Remove all escaped text (in [xxx])
-    mask = mask.replace(RE_TOKEN_ESCAPE, match => {
+    mask = mask.replace(RE_TOKEN_ESCAPE, (match) => {
       escaped.push(match.slice(1, -1));
       return '$' + idx++;
     });
 
-    mask = mask.replace(RE_TOKEN, match => {
+    mask = mask.replace(RE_TOKEN, (match) => {
+
       switch (match) {
         case 'LT':
         case 'LTS':
@@ -484,11 +472,7 @@ class Time {
         case 'LL':
         case 'LLL':
         case 'LLLL':
-          return this._locale &&
-            this._locale.format &&
-            this._locale.format[match]
-            ? this.format(this._locale.format[match], daysFromNow)
-            : MISSING_LOCALE_STRING;
+          return this._locale && this._locale.format && this._locale.format[match] ? this.format(this._locale.format[match], daysFromNow) : MISSING_LOCALE_STRING;
         case 'YY':
           return String(this.year()).slice(-2);
         case 'YYYY':
@@ -498,48 +482,28 @@ class Time {
         case 'MM':
           return pad(this.month() + 1);
         case 'MMM':
-          return this._localeHasProperty('monthsShort')
-            ? this._locale.monthsShort[this.month()]
-            : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('monthsShort') ? this._locale.monthsShort[this.month()] : MISSING_LOCALE_STRING;
         case 'MMMM':
-          return this._localeHasProperty('months')
-            ? this._locale.months[this.month()]
-            : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('months') ? this._locale.months[this.month()] : MISSING_LOCALE_STRING;
         case 'D':
           return this.date();
         case 'DD':
           return pad(this.date());
         case 'ddr':
-          if (relativeDay)
-            return this._localeHasProperty(relativeDay)
-              ? this._locale[relativeDay]
-              : MISSING_LOCALE_STRING;
-          return this._localeHasProperty('daysShort')
-            ? this._locale.daysShort[this.day()]
-            : MISSING_LOCALE_STRING;
+          if (relativeDay) return this._localeHasProperty(relativeDay) ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('daysShort') ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddr':
-          if (relativeDay)
-            return this._localeHasProperty(relativeDay)
-              ? this._locale[relativeDay]
-              : MISSING_LOCALE_STRING;
-          return this._localeHasProperty('days')
-            ? this._locale.days[this.day()]
-            : MISSING_LOCALE_STRING;
+          if (relativeDay) return this._localeHasProperty(relativeDay) ? this._locale[relativeDay] : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('days') ? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
         case 'd':
           return this.day();
         case 'ddd':
-          return this._localeHasProperty('daysShort')
-            ? this._locale.daysShort[this.day()]
-            : MISSING_LOCALE_STRING;
+          return  this._localeHasProperty('daysShort') ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddd':
-          return this._localeHasProperty('days')
-            ? this._locale.days[this.day()]
-            : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('days')? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
         case 'Hr':
           let daySlot = this._getTimeOfDay();
-          return this._localeHasProperty('daySlots')
-            ? this._locale.daySlots[daySlot]
-            : MISSING_LOCALE_STRING;
+          return this._localeHasProperty('daySlots') ? this._locale.daySlots[daySlot] : MISSING_LOCALE_STRING;
         case 'H':
           return this.hour();
         case 'HH':
@@ -567,7 +531,7 @@ class Time {
 
     // Replace all escaped text
     if (escaped.length) {
-      mask = mask.replace(RE_TOKEN_ESCAPED, match => {
+      mask = mask.replace(RE_TOKEN_ESCAPED, (match) => {
         return escaped[match.slice(1)];
       });
     }
@@ -579,8 +543,8 @@ class Time {
    * Retrieve instance of current time
    * @returns {Time}
    */
-  now() {
-    let instance = new Time().offset(this._offset);
+  now () {
+    let instance = (new Time()).offset(this._offset);
 
     instance._locale = this._locale;
     return instance;
@@ -590,7 +554,7 @@ class Time {
    * Retrieve instance at UTC time
    * @returns {Time}
    */
-  utc() {
+  utc () {
     if (!this._offset) return this.clone();
 
     let t = this.subtract(this._offset, 'minutes');
@@ -604,7 +568,7 @@ class Time {
    * Clone instance
    * @returns {Time}
    */
-  clone() {
+  clone () {
     let instance = new Time(this.timeString);
 
     instance._locale = this._locale;
@@ -618,7 +582,7 @@ class Time {
    * @param {String} method
    * @returns {Time}
    */
-  _set(value, method) {
+  _set (value, method) {
     let instance = this.clone();
     let d = instance._date;
 
@@ -631,15 +595,15 @@ class Time {
    * @param {Number} daysFromNow
    * @returns {String}
    */
-  _getRelativeDay(daysFromNow) {
+  _getRelativeDay (daysFromNow) {
     if (daysFromNow != null && daysFromNow < 2) {
       const hour = this.hour();
 
-      return daysFromNow == 1
+      return (daysFromNow == 1)
         ? 'tomorrow'
-        : hour >= nightStartsAt || hour < dayStartsAt
-        ? 'tonight'
-        : 'today';
+        : (hour >= nightStartsAt || hour < dayStartsAt)
+          ? 'tonight'
+          : 'today';
     }
     return '';
   }
@@ -675,14 +639,11 @@ class Time {
    */
   _localeHasProperty(localeProperty, subProperty) {
     if (subProperty) {
-      return (
-        this._locale &&
-        this._locale[localeProperty] &&
-        this._locale[localeProperty][subProperty]
-      );
+      return this._locale && this._locale[localeProperty] && this._locale[localeProperty][subProperty];
     } else {
       return this._locale && this._locale[localeProperty];
     }
+
   }
 
   /**
@@ -692,7 +653,7 @@ class Time {
    * @param {String} unit
    * @returns {Time}
    */
-  _manipulate(value, unit) {
+  _manipulate (value, unit) {
     if (this.isValid) {
       let instance = this.clone();
       let d = instance._date;
@@ -734,10 +695,8 @@ class Time {
    * @param {Time} time
    * @returns {Number}
    */
-  _monthDiff(time) {
-    const wholeMonthDiff =
-      (time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12 +
-      (time._date.getUTCMonth() - this._date.getUTCMonth());
+  _monthDiff (time) {
+    const wholeMonthDiff = ((time._date.getUTCFullYear() - this._date.getUTCFullYear()) * 12) + (time._date.getUTCMonth() - this._date.getUTCMonth());
     const anchor = this._manipulate(wholeMonthDiff, 'M');
     let adjust;
 
@@ -758,7 +717,7 @@ class Time {
    * Retrieve stringified
    * @returns {String}
    */
-  toString() {
+  toString () {
     if (!this.isValid) return 'Invalid Date';
     return this._date.toISOString().replace('Z', this._offsetString);
   }
@@ -767,7 +726,7 @@ class Time {
    * Convert to JSON format
    * @returns {String}
    */
-  toJSON() {
+  toJSON () {
     return this.timeString;
   }
 
@@ -775,9 +734,9 @@ class Time {
    * Retrieve number of milliseconds UTC
    * @returns {Number}
    */
-  valueOf() {
+  valueOf () {
     if (!this.isValid) return NaN;
-    return +this._date - (this._offset || 0) * 6e4;
+    return +this._date - ((this._offset || 0) * 6e4);
   }
 }
 
@@ -785,7 +744,7 @@ class Time {
  * Retrieve timestring for client "now"
  * @returns {String}
  */
-function clientNow() {
+function clientNow () {
   const d = new Date();
   const offset = -1 * d.getTimezoneOffset();
 
@@ -798,7 +757,7 @@ function clientNow() {
  * @param {Time} instance
  * @returns {Time}
  */
-function update(instance) {
+function update (instance) {
   instance.isValid = isValid(instance._date);
   instance.timeString = instance.toString();
   return instance;
@@ -809,7 +768,7 @@ function update(instance) {
  * @param {String} unit
  * @returns {String}
  */
-function normalizeUnit(unit) {
+function normalizeUnit (unit) {
   switch (unit) {
     case 'year':
     case 'years':
@@ -854,11 +813,9 @@ function normalizeUnit(unit) {
  * @param {Date} date
  * @returns {Boolean}
  */
-function isValid(date) {
-  return (
-    Object.prototype.toString.call(date) == '[object Date]' &&
-    !isNaN(date.getTime())
-  );
+function isValid (date) {
+  return Object.prototype.toString.call(date) == '[object Date]'
+    && !isNaN(date.getTime());
 }
 
 /**
@@ -866,7 +823,7 @@ function isValid(date) {
  * @param {Time} time
  * @returns {Boolean}
  */
-function isTime(time) {
+function isTime (time) {
   return time != null && time._manipulate != null && time._date != null;
 }
 
@@ -875,7 +832,7 @@ function isTime(time) {
  * @param {Number} value
  * @returns {Number}
  */
-function round(value) {
+function round (value) {
   if (value < 0) return Math.ceil(value);
   return Math.floor(value);
 }
@@ -886,7 +843,7 @@ function round(value) {
  * @param {Number} [length]
  * @returns {String}
  */
-function pad(value, length) {
+function pad (value, length) {
   value = String(value);
   length = length || 2;
 
@@ -902,10 +859,10 @@ function pad(value, length) {
  * @param {Number} minutes
  * @returns {String}
  */
-function minutesToOffsetString(minutes) {
+function minutesToOffsetString (minutes) {
   const t = String(Math.abs(minutes / 60)).split('.');
   const H = pad(t[0]);
-  const m = t[1] ? parseInt(t[1], 10) * 0.6 : 0;
+  const m = t[1] ? (parseInt(t[1], 10) * 0.6) : 0;
   const sign = minutes < 0 ? '-' : '+';
 
   return `${sign}${H}:${pad(m)}`;
