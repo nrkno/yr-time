@@ -12,7 +12,8 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "scripts": {
-    "prepublish": "yarn run build; yarn run build:docs",
+    "prepublish": "yarn run build",
+    "postpublish": "yarn run deploy:docs",
     "prebuild": "rimraf dist",
     "build": "microbundle",
     "dev": "microbundle watch",
