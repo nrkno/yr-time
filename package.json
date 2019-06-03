@@ -18,6 +18,7 @@
     "dev": "microbundle watch",
     "prebuild:docs": "rimraf docs",
     "build:docs": "microbundle build --sourcemap false --entry src/index.test.js --output docs/index.test.js; node test/test-runner.js",
+    "predeploy:docs": "yarn run build:docs",
     "deploy:docs": "gh-pages -d docs",
     "pretest": "yarn run build:docs",
     "test": "cross-env NODE_ENV=test mocha docs/index.test.js --reporter spec --require test/mocha-setup.js"
