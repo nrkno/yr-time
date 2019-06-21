@@ -36,7 +36,7 @@ const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
 let nightStartsAt = DEFAULT_NIGHT_STARTS_AT;
 
-module.exports = {
+export default {
   isTime,
 
   /**

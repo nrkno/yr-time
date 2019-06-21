@@ -1,20 +1,12 @@
 'use strict';
 
-var en, expect, nb, time;
+import en from '../locale/en.json';
+import nb from '../locale/nb.json';
+import time from '../src/index.js';
 
-// Make it work in browser
-try {
-  // if (err) console.log(err);
-  en = require('src/index-locales').en;
-  expect = window.chai.expect;
-  nb = require('src/index-locales').nb;
-  time = require('src/index-locales').time;
-  // .. or Node
-} catch (err) {
-  en = require('../locale/en');
-  expect = require('chai').expect;
-  nb = require('../locale/nb');
-  time = require('../src/index');
+// Make `expect` available when testing in a browser
+if (typeof window !== 'undefined') {
+  window.expect = window.chai.expect;
 }
 
 describe('time', function() {
