@@ -724,7 +724,7 @@ describe('time', function() {
       it('should return "false" for too small offsets', function() {
         expect(
           time.create('2016-01-01T00:00:00+02:00').isBefore(time.create('2016-01-01T00:00:00+01:00'), 'M')
-          ).to.equal(false);
+        ).to.equal(false);
         expect(
           time.create('2016-01-01T00:00:00+02:00').isBefore(time.create('2016-01-01T00:00:00+01:00'), 'D')
         ).to.equal(false);
