@@ -127,6 +127,13 @@ time.create('2016-12-31')
   .isBefore(time.create('2017-1-1'), 'day'); //=> true
 ```
 
+**isAfter(_time_, _unit_)**: determine if Time instance comes after `time` when evaluated in specified `unit`:
+
+```js
+time.create('2017-1-1')
+  .isAfter(time.create('2016-12-31'), 'day'); //=> true
+```
+
 **locale(_locale_)**: set locale for this instance. Returns a new `Time` instance. See [en.json](https://github.com/YR/date/blob/master/locale/en.json) for an example of expected properties.
 
 **format(_mask_, _daysFromNow_)**: retrieve a string representation based on format described in `mask`. Format masks can contain one or more of the following tokens:
