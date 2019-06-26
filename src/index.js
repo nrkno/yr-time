@@ -420,12 +420,31 @@ class Time {
    * @returns {Boolean}
    */
   isBefore (time, unit) {
-    if (!this.isValid || !time.isValid) return false;
+    if (!this.isValid || !time.isValid) {
+      return false;
+    }
 
     unit = normalizeUnit(unit);
-    const tLimited = unit == 'S' ? this : this.endOf(unit);
+    const thisLimited = unit == 'S' ? this : this.endOf(unit);
 
-    return tLimited.valueOf() < time.valueOf();
+    return thisLimited.valueOf() < time.valueOf();
+  }
+
+  /**
+   * Compare this, limited by 'unit', and determine if this is after 'time'
+   * @param {Time} time
+   * @param {String} [unit]
+   * @returns {Boolean}
+   */
+  isAfter (time, unit) {
+    if (!this.isValid || !time.isValid) {
+      return false;
+    }
+
+    unit = normalizeUnit(unit);
+    const timeLimited = unit == 'S' ? time : time.endOf(unit);
+
+    return this.valueOf() > timeLimited.valueOf();
   }
 
   /**

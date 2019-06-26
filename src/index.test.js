@@ -731,6 +731,60 @@ describe('time', function() {
       });
     });
 
+    describe('isAfter()', function() {
+      it('should return "false" for invalid', function() {
+        expect(time.create('foo').isAfter(time.create('2016-01-01T00:00:00'))).to.equal(false);
+        expect(time.create('2016-01-01T00:00:00').isAfter(time.create('foo'))).to.equal(false);
+      });
+      it('should return "false" for same', function() {
+        var t = time.create('2016-01-01T00:00:00');
+
+        expect(t.isAfter(time.create('2016-01-01T00:00:00'))).to.equal(false);
+        expect(t.isAfter(t.clone())).to.equal(false);
+      });
+      it('should return "true" for year', function() {
+        expect(time.create('2016-01-01T00:00:00').isAfter(time.create('2015-01-01T00:00:00'), 'Y')).to.equal(true);
+      });
+      it('should return "true" for month', function() {
+        expect(time.create('2016-01-01T00:00:00').isAfter(time.create('2015-01-01T00:00:00'), 'M')).to.equal(true);
+        expect(time.create('2016-02-01T00:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'M')).to.equal(true);
+      });
+      it('should return "true" for day', function() {
+        expect(time.create('2016-01-01T00:00:00').isAfter(time.create('2015-01-01T00:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-02-01T00:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'D')).to.equal(true);
+        expect(time.create('2016-01-02T00:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'D')).to.equal(true);
+      });
+      it('should return "true" for hour', function() {
+        expect(time.create('2016-01-01T00:00:00').isAfter(time.create('2015-01-01T00:00:00'), 'H')).to.equal(true);
+        expect(time.create('2016-02-01T00:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-02T00:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'H')).to.equal(true);
+        expect(time.create('2016-01-01T01:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'H')).to.equal(true);
+      });
+      it('should return "true" for minute', function() {
+        expect(time.create('2016-01-01T00:00:00').isAfter(time.create('2015-01-01T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-02-01T00:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-01-02T00:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-01-01T01:00:00').isAfter(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
+        expect(time.create('2016-01-01T00:01:00').isAfter(time.create('2016-01-01T00:00:00'), 'm')).to.equal(true);
+      });
+      it('should return "true" for offsets', function() {
+        expect(
+          time.create('2016-01-01T00:00:00+01:00').isAfter(time.create('2016-01-01T00:00:00+02:00'), 'H')
+        ).to.equal(true);
+        expect(
+          time.create('2016-01-01T00:00:00+01:00').isAfter(time.create('2016-01-01T00:00:00+02:00'), 'm')
+        ).to.equal(true);
+      });
+      it('should return "false" for too small offsets', function() {
+        expect(
+          time.create('2016-01-01T00:00:00+01:00').isAfter(time.create('2016-01-01T00:00:00+02:00'), 'M')
+        ).to.equal(false);
+        expect(
+          time.create('2016-01-01T00:00:00+01:00').isAfter(time.create('2016-01-01T00:00:00+02:00'), 'D')
+        ).to.equal(false);
+      });
+    });
+
     describe('format()', function() {
       it('should handle year masks', function() {
         expect(time.create('2016-01-01T00:00:00').format('YY')).to.equal('16');
