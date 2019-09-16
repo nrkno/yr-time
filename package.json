@@ -1,7 +1,7 @@
 {
-  "name": "@yr/time",
+  "name": "@nrk/yr-time",
   "description": "Efficient, immutable, utility for working with time/dates",
-  "version": "6.1.0",
+  "version": "7.0.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "repository": "https://github.com/YR/time.git",
   "license": "MIT",
