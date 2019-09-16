@@ -6,7 +6,7 @@ An efficient, immutable, utility for working with time/dates.
 ## Usage
 
 ```js
-const time = require('@yr/time');
+const time = require('@nrk/yr-time');
 const t = time.create('2016-01-01')
   .add(2, 'hours')
   .subtract(1, 'day')
