@@ -39,7 +39,7 @@ If `timeString` is omitted altogether, an instance is created with time set to c
 
 ### Time instances
 
-**offset(_value)**: update an instance's Offset with `value` (in minutes).  Returns a new `Time` instance.
+**offset(_value_)**: get/set an instance's timezone offset with `value` (in minutes). If passed a `value`, returns a new `Time` instance.
 
 **add(_value_, _unit_)**: add specified `value` in specified `unit` to the instance. Returns a new `Time` instance:
 

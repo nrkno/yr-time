@@ -122,11 +122,14 @@ class Time {
   }
 
   /**
-   * Modify Offset with new 'value' in minutes
-   * @param {Number} value
-   * @returns {Time}
+   * Get/set timezone offset with new 'value' in minutes
+   * Returns new instance when setting
+   * @param {Number} [value]
+   * @returns {Number|Time}
    */
   offset (value) {
+    if (value == null) return this._offset;
+
     if (value == this._offset) return this;
 
     let instance = this.utc()._manipulate(value, 'minutes');

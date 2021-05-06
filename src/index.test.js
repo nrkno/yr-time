@@ -351,6 +351,11 @@ describe('time', function() {
     });
 
     describe('offset()', function() {
+      it('should return offset if no offset value', function() {
+        var t = time.create('2016-01-01T00:00:00+01:00');
+
+        expect(t.offset()).to.equal(60);
+      });
       it('should return same instance if same offset', function() {
         var t = time.create('2016-01-01T00:00:00+01:00');
 
