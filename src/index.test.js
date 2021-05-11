@@ -869,6 +869,26 @@ describe('time', function() {
             .format('LLLL')
         ).to.equal('January (standalone)');
       });
+      it('should fallback to month masks if standalone months are not defined', function() {
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('LLL')
+        ).to.equal('Jan.');
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('LLLL')
+        ).to.equal('January');
+        expect(
+          time
+            .create('2016-01-01T00:00:00-01:00')
+            .locale(en)
+            .format('LLLL')
+        ).to.equal('January');
+      });
       it('should handle day of month masks', function() {
         expect(time.create('2016-01-01T00:00:00').format('D')).to.equal('1');
         expect(time.create('2016-01-01T00:00:00').format('DD')).to.equal('01');
@@ -935,6 +955,26 @@ describe('time', function() {
             .locale(enLocaleWithStandaloneDays)
             .format('cccc')
         ).to.equal('Friday (standalone)');
+      });
+      it('should fallback to day of week masks if standalone day of weeks are not defined', function() {
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('ccc')
+        ).to.equal('Fri.');
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('cccc')
+        ).to.equal('Friday');
+        expect(
+          time
+            .create('2016-01-01T00:00:00-01:00')
+            .locale(en)
+            .format('cccc')
+        ).to.equal('Friday');
       });
       it('should handle hour masks', function() {
         expect(time.create('2016-01-01T00:00:00').format('H')).to.equal('0');
