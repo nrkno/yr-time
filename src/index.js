@@ -30,7 +30,7 @@ const FLAGS_START_OF = {
 };
 // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
 const RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
-const RE_TOKEN = /(Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}r?|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
+const RE_TOKEN = /(Y{4}|Y{2}|M{1,4}|L{3,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|c{3,4}|H{1,2}r?|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
 const RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
@@ -500,6 +500,10 @@ class Time {
           return this._localeHasProperty('monthsShort') ? this._locale.monthsShort[this.month()] : MISSING_LOCALE_STRING;
         case 'MMMM':
           return this._localeHasProperty('months') ? this._locale.months[this.month()] : MISSING_LOCALE_STRING;
+        case 'LLL':
+          return this._localeHasProperty('monthsShortStandalone') ? this._locale.monthsShortStandalone[this.month()] : MISSING_LOCALE_STRING;
+        case 'LLLL':
+          return this._localeHasProperty('monthsStandalone') ? this._locale.monthsStandalone[this.month()] : MISSING_LOCALE_STRING;
         case 'D':
           return this.date();
         case 'DD':
@@ -516,6 +520,10 @@ class Time {
           return  this._localeHasProperty('daysShort') ? this._locale.daysShort[this.day()] : MISSING_LOCALE_STRING;
         case 'dddd':
           return this._localeHasProperty('days')? this._locale.days[this.day()] : MISSING_LOCALE_STRING;
+        case 'ccc':
+          return  this._localeHasProperty('daysShortStandalone') ? this._locale.daysShortStandalone[this.day()] : MISSING_LOCALE_STRING;
+        case 'cccc':
+          return this._localeHasProperty('daysStandalone')? this._locale.daysStandalone[this.day()] : MISSING_LOCALE_STRING;
         case 'Hr':
           let daySlot = this._getTimeOfDay();
           return this._localeHasProperty('daySlots') ? this._locale.daySlots[daySlot] : MISSING_LOCALE_STRING;
