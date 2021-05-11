@@ -138,37 +138,43 @@ time.create('2017-1-1')
 
 **format(_mask_, _daysFromNow_)**: retrieve a string representation based on format described in `mask`. Format masks can contain one or more of the following tokens:
 
-|                       | Token   | Output                                 |
-|-----------------------|:--------|:---------------------------------------|
-| __Year__              | YY      | 70 71 ... 29 30                        |
-|                       | YYYY    | 1970 1971 ... 2029 2030                |
-| __Month__             | M       | 1 2 ... 11 12                          |
-|                       | MM      | 01 02 ... 11 12                        |
-|                       | MMM*    | Jan Feb ... Nov Dec                    |
-|                       | MMMM*   | January February ... November December |
-| __Day of month__      | D       | 1 2 ... 30 31                          |
-|                       | DD      | 01 02 ... 30 31                        |
-| __Day of week__       | d       | 0 1 ... 5 6                            |
-|                       | ddd*    | Sun Mon ... Fri Sat                    |
-|                       | dddd*   | Sunday Monday ... Friday Saturday      |
-|                       | ddr**   | Today Tomorrow ... Fri Sat             |
-|                       | dddr**  | Today Tomorrow ... Friday Saturday     |
-| __Hour__              | H       | 0 1 ... 22 23                          |
-|                       | HH      | 00 01 ... 22 23                        |
-|                       | Hr*     | night (0 - 6),                         |
-|                       |         | morning (6 - 12),                      |
-|                       |         | afternoon (12 - 18),                   |
-|                       |         | evening (18 - 24)                      |
-| __Minute__            | m       | 0 1 ... 58 59                          |
-|                       | mm      | 00 01 ... 58 59                        |
-| __Second__            | s       | 0 1 ... 58 59                          |
-|                       | ss      | 00 01 ... 58 59                        |
-| __Fractional second__ | S       | 0 1 ... 8 9                            |
-|                       | SS      | 0 1 ... 98 99                          |
-|                       | SSS     | 0 1 ... 998 999                        |
-| __Offset__            | ZZ      | -07:00 -06:00 ... +06:00 +07:00        |
+|                              | Token   | Output                                 |
+|------------------------------|:--------|:---------------------------------------|
+| __Year__                     | YY      | 70 71 ... 29 30                        |
+|                              | YYYY    | 1970 1971 ... 2029 2030                |
+| __Month__                    | M       | 1 2 ... 11 12                          |
+|                              | MM      | 01 02 ... 11 12                        |
+|                              | MMM*    | Jan Feb ... Nov Dec                    |
+|                              | MMMM*   | January February ... November December |
+| __Month__ (standalone)       | LLL*    | Jan Feb ... Nov Dec                    |
+|                              | LLLL*   | January February ... November December |
+| __Day of month__             | D       | 1 2 ... 30 31                          |
+|                              | DD      | 01 02 ... 30 31                        |
+| __Day of week__              | d       | 0 1 ... 5 6                            |
+|                              | ddd*    | Sun Mon ... Fri Sat                    |
+|                              | dddd*   | Sunday Monday ... Friday Saturday      |
+|                              | ddr**   | Today Tomorrow ... Fri Sat             |
+|                              | dddr**  | Today Tomorrow ... Friday Saturday     |
+| __Day of week__ (standalone) | ccc*    | Sun Mon ... Fri Sat                    |
+|                              | cccc*   | Sunday Monday ... Friday Saturday      |
+| __Hour__                     | H       | 0 1 ... 22 23                          |
+|                              | HH      | 00 01 ... 22 23                        |
+|                              | Hr*     | night (0 - 6),                         |
+|                              |         | morning (6 - 12),                      |
+|                              |         | afternoon (12 - 18),                   |
+|                              |         | evening (18 - 24)                      |
+| __Minute__                   | m       | 0 1 ... 58 59                          |
+|                              | mm      | 00 01 ... 58 59                        |
+| __Second__                   | s       | 0 1 ... 58 59                          |
+|                              | ss      | 00 01 ... 58 59                        |
+| __Fractional second__        | S       | 0 1 ... 8 9                            |
+|                              | SS      | 0 1 ... 98 99                          |
+|                              | SSS     | 0 1 ... 998 999                        |
+| __Offset__                   | ZZ      | -07:00 -06:00 ... +06:00 +07:00        |
 \* requires locale
 \*\* relative day based on `daysFromNow`
+
+`standalone` is used for e.g. Sami
 
 ```js
 time.create('2016-12-01T12:00:00')

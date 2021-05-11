@@ -30,7 +30,7 @@ const FLAGS_START_OF = {
 };
 // YYYY-MM-DDTHH:mm:ss or YYYY-MM-DDTHH:mm:ss.SSSZ or YYYY-MM-DDTHH:mm:ss+00:00
 const RE_PARSE = /^(\d{2,4})-?(\d{1,2})?-?(\d{1,2})?T?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?\.?(\d{3})?(?:Z|(([+-])(\d{2}):?(\d{2})))?$/;
-const RE_TOKEN = /(LTS?|L{1,4}|Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}r?|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
+const RE_TOKEN = /(Y{4}|Y{2}|M{1,4}|D{1,2}|d{3}r|d{2}r|d{1,4}|H{1,2}r?|m{1,2}|s{1,2}|S{1,3}|ZZ)/g;
 const RE_TOKEN_ESCAPE = /(\[[^\]]+\])/g;
 const RE_TOKEN_ESCAPED = /(\$\d\d?)/g;
 let dayStartsAt = DEFAULT_DAY_STARTS_AT;
@@ -488,13 +488,6 @@ class Time {
     mask = mask.replace(RE_TOKEN, (match) => {
 
       switch (match) {
-        case 'LT':
-        case 'LTS':
-        case 'L':
-        case 'LL':
-        case 'LLL':
-        case 'LLLL':
-          return this._locale && this._locale.format && this._locale.format[match] ? this.format(this._locale.format[match], daysFromNow) : MISSING_LOCALE_STRING;
         case 'YY':
           return String(this.year()).slice(-2);
         case 'YYYY':
