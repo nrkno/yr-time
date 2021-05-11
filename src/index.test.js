@@ -818,6 +818,77 @@ describe('time', function() {
             .format('MMMM')
         ).to.equal('January');
       });
+      it('should handle standalone month masks', function() {
+        const enLocaleWithStandaloneMonths = {
+          ...en,
+          monthsShortStandalone: [
+            'Jan. (standalone)',
+            'Feb. (standalone)',
+            'Mar. (standalone)',
+            'Apr. (standalone)',
+            'May (standalone)',
+            'June (standalone)',
+            'July (standalone)',
+            'Aug. (standalone)',
+            'Sep. (standalone)',
+            'Oct. (standalone)',
+            'Nov. (standalone)',
+            'Dec. (standalone)'
+          ],
+          monthsStandalone: [
+            'January (standalone)',
+            'February (standalone)',
+            'March (standalone)',
+            'April (standalone)',
+            'May (standalone)',
+            'June (standalone)',
+            'July (standalone)',
+            'August (standalone)',
+            'September (standalone)',
+            'October (standalone)',
+            'November (standalone)',
+            'December (standalone)'
+          ]
+        };
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(enLocaleWithStandaloneMonths)
+            .format('LLL')
+        ).to.equal('Jan. (standalone)');
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(enLocaleWithStandaloneMonths)
+            .format('LLLL')
+        ).to.equal('January (standalone)');
+        expect(
+          time
+            .create('2016-01-01T00:00:00-01:00')
+            .locale(enLocaleWithStandaloneMonths)
+            .format('LLLL')
+        ).to.equal('January (standalone)');
+      });
+      it('should fallback to month masks if standalone months are not defined', function() {
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('LLL')
+        ).to.equal('Jan.');
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('LLLL')
+        ).to.equal('January');
+        expect(
+          time
+            .create('2016-01-01T00:00:00-01:00')
+            .locale(en)
+            .format('LLLL')
+        ).to.equal('January');
+      });
       it('should handle day of month masks', function() {
         expect(time.create('2016-01-01T00:00:00').format('D')).to.equal('1');
         expect(time.create('2016-01-01T00:00:00').format('DD')).to.equal('01');
@@ -842,6 +913,67 @@ describe('time', function() {
             .create('2016-01-01T00:00:00-01:00')
             .locale(en)
             .format('dddd')
+        ).to.equal('Friday');
+      });
+      it('should handle standalone day of week masks', function() {
+        const enLocaleWithStandaloneDays = {
+          ...en,
+          daysShortStandalone: [
+            'Sun. (standalone)',
+            'Mon. (standalone)',
+            'Tue. (standalone)',
+            'Wed. (standalone)',
+            'Thur. (standalone)',
+            'Fri. (standalone)',
+            'Sat. (standalone)'
+          ],
+          daysStandalone: [
+            'Sunday (standalone)',
+            'Monday (standalone)',
+            'Tuesday (standalone)',
+            'Wednesday (standalone)',
+            'Thursday (standalone)',
+            'Friday (standalone)',
+            'Saturday (standalone)'
+          ],
+        };
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(enLocaleWithStandaloneDays)
+            .format('ccc')
+        ).to.equal('Fri. (standalone)');
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(enLocaleWithStandaloneDays)
+            .format('cccc')
+        ).to.equal('Friday (standalone)');
+        expect(
+          time
+            .create('2016-01-01T00:00:00-01:00')
+            .locale(enLocaleWithStandaloneDays)
+            .format('cccc')
+        ).to.equal('Friday (standalone)');
+      });
+      it('should fallback to day of week masks if standalone day of weeks are not defined', function() {
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('ccc')
+        ).to.equal('Fri.');
+        expect(
+          time
+            .create('2016-01-01T00:00:00')
+            .locale(en)
+            .format('cccc')
+        ).to.equal('Friday');
+        expect(
+          time
+            .create('2016-01-01T00:00:00-01:00')
+            .locale(en)
+            .format('cccc')
         ).to.equal('Friday');
       });
       it('should handle hour masks', function() {
@@ -914,82 +1046,6 @@ describe('time', function() {
             .format('dddr', 0)
         ).to.equal('Tonight');
         time.init();
-      });
-      it('should handle localized format masks for "en"', function() {
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(en)
-            .format('LT', 0)
-        ).to.equal('07:00');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(en)
-            .format('LTS', 0)
-        ).to.equal('07:00:00');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(en)
-            .format('L', 0)
-        ).to.equal('01/01/2016');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(en)
-            .format('LL', 0)
-        ).to.equal('1 January 2016');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(en)
-            .format('LLL', 0)
-        ).to.equal('1 January 2016 07:00');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(en)
-            .format('LLLL', 0)
-        ).to.equal('Friday, 1 January 2016 07:00');
-      });
-      it('should handle localized format masks for "nb"', function() {
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(nb)
-            .format('LT', 0)
-        ).to.equal('07:00');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(nb)
-            .format('LTS', 0)
-        ).to.equal('07:00:00');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(nb)
-            .format('L', 0)
-        ).to.equal('01.01.2016');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(nb)
-            .format('LL', 0)
-        ).to.equal('1. januar 2016');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(nb)
-            .format('LLL', 0)
-        ).to.equal('1. januar 2016 kl. 07:00');
-        expect(
-          time
-            .create('2016-01-01T07:00:00')
-            .locale(nb)
-            .format('LLLL', 0)
-        ).to.equal('fredag 1. januar 2016 kl. 07:00');
       });
 
       it('should handle "HR" format', () => {

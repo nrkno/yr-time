@@ -23,14 +23,6 @@
     "afternoon": "ettermiddag",
     "evening": "kveld"
   },
-  "format": {
-    "LT" : "HH:mm",
-    "LTS" : "HH:mm:ss",
-    "L" : "DD.MM.YYYY",
-    "LL" : "D. MMMM YYYY",
-    "LLL" : "D. MMMM YYYY [kl.] HH:mm",
-    "LLLL" : "dddd D. MMMM YYYY [kl.] HH:mm"
-  },
   "monthsShort": [
     "jan.",
     "feb.",
